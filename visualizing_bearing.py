@@ -7,7 +7,7 @@ Ts = 1/30
 mav1 = MavDynamics([-300., 0., 0., 30.], Ts)
 mav2 = MavDynamics([0., -300., np.pi/2, 30.], Ts)
 
-u = 0.
+u = -0.05
 
 bearings = []
 bearings_vel = []
@@ -17,11 +17,11 @@ control = []
 relative_velocities = []
 
 for i in range(500):
-    mav1.update(-0.05)
+    mav1.update(u)
     mav2.update(0.0)
-    ux = -mav1._state[3]*-0.05*np.sin(mav1._state[2])
-    uy = mav1._state[3]*-0.05*np.cos(mav1._state[2])
-    control.append(np.array([ux, uy]))
+    un = -mav1._state[3]*u*np.sin(mav1._state[2])
+    ue = mav1._state[3]*u*np.cos(mav1._state[2])
+    control.append(np.array([un, ue]))
 
     bearing = np.arctan2(mav2._state[1] - mav1._state[1], mav2._state[0] - mav1._state[0])
     relative_bearing = (bearing - mav1._state[2]) % (2*np.pi)
@@ -38,7 +38,7 @@ for i in range(500):
 
     rel_vel_own = mav1._state[3]*np.array([np.cos(mav1._state[2]), np.sin(mav1._state[2])])
     rel_vel_intruder = mav2._state[3]*np.array([np.cos(mav2._state[2]), np.sin(mav2._state[2])])
-    relative_velocity = rel_vel_own - rel_vel_intruder
+    relative_velocity = rel_vel_intruder - rel_vel_own
     relative_velocities.append(relative_velocity)
 
     plt.plot(mav1._state[1], mav1._state[0], 'ro')

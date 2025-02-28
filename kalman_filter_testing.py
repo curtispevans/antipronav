@@ -13,7 +13,7 @@ relative_velocities = np.load('data/relative_velocity.npy')
 
 Ts = 1/30
 
-mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,0], relative_velocities[0,1], 1./true_distance[0]])
+mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,1], relative_velocities[0,0], 1./true_distance[0]])
 sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.cos(jnp.radians(0.1)), 1, 1, 1, 1]))
 
 R = jnp.eye(6) * 0.1
