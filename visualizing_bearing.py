@@ -15,6 +15,7 @@ pixel_sizes = []
 distances = []
 control = []
 relative_velocities = []
+own_velocities = []
 
 for i in range(500):
     mav1.update(u)
@@ -40,6 +41,8 @@ for i in range(500):
     rel_vel_intruder = mav2._state[3]*np.array([np.cos(mav2._state[2]), np.sin(mav2._state[2])])
     relative_velocity = rel_vel_intruder - rel_vel_own
     relative_velocities.append(relative_velocity)
+
+    own_velocities.append(rel_vel_own)
 
     plt.plot(mav1._state[1], mav1._state[0], 'ro')
     plt.plot(mav2._state[1], mav2._state[0], 'bo')
@@ -84,3 +87,4 @@ np.save('data/pixel_sizes.npy', np.array(pixel_sizes))
 np.save('data/distances.npy', np.array(distances))
 np.save('data/control.npy', np.array(control))
 np.save('data/relative_velocity.npy', np.array(relative_velocities))
+np.save('data/own_velocity.npy', np.array(own_velocities))
