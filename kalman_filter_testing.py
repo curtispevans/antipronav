@@ -13,11 +13,11 @@ relative_velocities = np.load('data/relative_velocity.npy')
 
 Ts = 1/30
 
-mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,1], relative_velocities[0,0], 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.cos(jnp.radians(0.1)), 1, 1, 1, 1]))
+mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,0], relative_velocities[0,1], 1./true_distance[0]])
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 1, 1, 10]))
 
-R = jnp.eye(6) * 0.1
-Q = jnp.eye(3) * 0.1
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.sin(jnp.radians(0.1)), 1, 0.1, 0.1, 0.1]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.sin(jnp.radians(0.1)), 1]))
 
 est_dist = []
 est_bearing = []
@@ -25,10 +25,10 @@ est_pixel_size = []
 est_relative_velocity_x = []
 est_relative_velocity_y = []
 
-for bearing, pixel_size, u in zip(bearings, pixel_sizes, control):
+for bearing, pixel_size, u in zip(bearings[1:], pixel_sizes[1:], control[1:]):
     measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
     mu, sigma = kalman_update(mu, sigma, u, measurement, R, Q, Ts)
-    est_dist.append(np.abs(1/mu[5]))
+    est_dist.append(mu[5])
     est_bearing.append(np.arctan2(mu[1], mu[0]))
     est_pixel_size.append(mu[2])
     est_relative_velocity_x.append(mu[3])
@@ -42,6 +42,7 @@ plt.plot(est_bearing, label='Estimated Bearing')
 plt.xlabel('Time')
 plt.ylabel('Bearing')
 plt.legend()
+plt.grid()
 plt.title('Bearing between Mavs')
 
 plt.subplot(222)
@@ -50,15 +51,17 @@ plt.plot(est_pixel_size, label='Estimated Pixel Size')
 plt.xlabel('Time')
 plt.ylabel('Pixel Size')
 plt.title('Pixel Size')
+plt.grid()
 plt.legend()
 
 
 plt.subplot(223)
-plt.plot(true_distance, label='True Distance')
+plt.plot(1/true_distance, label='True Distance')
 plt.plot(est_dist, label='Estimated Distance')
 plt.xlabel('Time')
 plt.ylabel('Distance')
 plt.title('Distance between Mavs')
+plt.grid()
 plt.legend()
 
 plt.subplot(224)
@@ -69,6 +72,7 @@ plt.plot(est_relative_velocity_y, label='Estimated Relative Velocity Y')
 plt.xlabel('Time')
 plt.ylabel('Relative Velocity')
 plt.title('Relative Velocity')
+plt.grid()
 plt.legend()
 
 plt.tight_layout()
