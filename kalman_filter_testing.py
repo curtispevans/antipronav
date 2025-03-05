@@ -14,21 +14,23 @@ relative_velocities = np.load('data/relative_velocity.npy')
 Ts = 1/30
 
 mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,0], relative_velocities[0,1], 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 1, 1, 10]))
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.01, 0.01, 0.001]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.sin(jnp.radians(0.1)), 1, 0.1, 0.1, 0.1]))
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.sin(jnp.radians(0.1)), 1]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.sin(jnp.radians(0.001)), 1, 0.1, 0.1, 0.1]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.sin(jnp.radians(0.001)), 0.1]))
 
 est_dist = []
 est_bearing = []
 est_pixel_size = []
 est_relative_velocity_x = []
 est_relative_velocity_y = []
+inv_dist_std = []
 
 for bearing, pixel_size, u in zip(bearings[1:], pixel_sizes[1:], control[1:]):
     measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
     mu, sigma = kalman_update(mu, sigma, u, measurement, R, Q, Ts)
     est_dist.append(mu[5])
+    inv_dist_std.append(jnp.sqrt(sigma[-1,-1]))
     est_bearing.append(np.arctan2(mu[1], mu[0]))
     est_pixel_size.append(mu[2])
     est_relative_velocity_x.append(mu[3])
@@ -58,9 +60,11 @@ plt.legend()
 plt.subplot(223)
 plt.plot(1/true_distance, label='True Distance')
 plt.plot(est_dist, label='Estimated Distance')
+# plt.plot(np.array(est_dist) + np.array(inv_dist_std), '--', color='black', label='Estimated Distance + Std')
+# plt.plot(np.array(est_dist) - np.array(inv_dist_std), '--', color='black', label='Estimated Distance - Std')
 plt.xlabel('Time')
-plt.ylabel('Distance')
-plt.title('Distance between Mavs')
+plt.ylabel('1/Distance')
+plt.title('1/Distance between Mavs')
 plt.grid()
 plt.legend()
 
