@@ -15,10 +15,10 @@ own_velocities = np.load('data/own_velocity.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
 
-mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], 0., 30., 1./true_distance[0]])
+mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), 0.001, 0., 30., 1./10000])
 sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .0000001, 0.000001, 0.01]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.000001, 0.0000001, 0.0001]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.000001, 0.0000001, 0.0000000001]))
 Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))
 
 est_dist = []
