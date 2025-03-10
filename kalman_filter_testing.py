@@ -14,9 +14,9 @@ relative_velocities = np.load('data/relative_velocity.npy')
 Ts = 1/30
 
 mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], relative_velocities[0,0], relative_velocities[0,1], 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.01, 0.01, 0.001]))
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.cos(jnp.radians(0.001)), 0.1, 0.01, 0.01, 0.01]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.sin(jnp.radians(0.001)), 1, 0.1, 0.1, 0.1]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.sin(jnp.radians(0.001)), 1, 0.01, 0.01, 0.0001]))
 Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001)), jnp.sin(jnp.radians(0.001)), 0.1]))
 
 est_dist = []
@@ -26,7 +26,7 @@ est_relative_velocity_x = []
 est_relative_velocity_y = []
 inv_dist_std = []
 
-for bearing, pixel_size, u in zip(bearings[1:], pixel_sizes[1:], control[1:]):
+for bearing, pixel_size, u in zip(bearings[:], pixel_sizes[:], control[:]):
     measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
     mu, sigma = kalman_update(mu, sigma, u, measurement, R, Q, Ts)
     est_dist.append(mu[5])
@@ -39,8 +39,8 @@ for bearing, pixel_size, u in zip(bearings[1:], pixel_sizes[1:], control[1:]):
 
 
 plt.subplot(221)
-plt.plot(bearings, label='True Bearing')
-plt.plot(est_bearing, label='Estimated Bearing')
+plt.plot(np.rad2deg(bearings), label='True Bearing')
+plt.plot(np.rad2deg(np.array(est_bearing)), label='Estimated Bearing')
 plt.xlabel('Time')
 plt.ylabel('Bearing')
 plt.legend()
