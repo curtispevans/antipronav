@@ -13,12 +13,13 @@ relative_velocities = np.load('data/relative_velocity.npy')
 own_velocities = np.load('data/own_velocity.npy')
 
 Ts = 1/30
+intruder_vel = np.array([0., 30.])
 
-mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], 0., 30, 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.cos(jnp.radians(0.1)), 1, 1, 1, 1]))
+mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], 0., 30., 1./true_distance[0]])
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .0000001, 0.000001, 0.01]))
 
-R = jnp.eye(6) * 0.1
-Q = jnp.eye(3) * 0.1
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.000001, 0.0000001, 0.0001]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))
 
 est_dist = []
 est_bearing = []
@@ -29,7 +30,7 @@ est_relative_velocity_y = []
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
     measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
     mu, sigma = kalman_update(mu, sigma, own_vel, measurement, R, Q, Ts)
-    est_dist.append(1/mu[5])
+    est_dist.append(mu[5])
     est_bearing.append(np.arctan2(mu[1], mu[0]))
     est_pixel_size.append(mu[2])
     est_relative_velocity_x.append(mu[3])
@@ -55,22 +56,31 @@ plt.legend()
 
 
 plt.subplot(223)
+plt.plot(1/true_distance, label='True inverse distance')
+plt.plot(est_dist, label='Estimated inverse distance')
+plt.xlabel('Time')
+plt.ylabel('Inverse Distance')
+plt.title('Inverse Distance between Mavs')
+plt.legend()
+
+
+plt.subplot(224)
 plt.plot(true_distance, label='True Distance')
-plt.plot(est_dist, label='Estimated Distance')
+plt.plot(1/np.array(est_dist), label='Estimated Distance')
 plt.xlabel('Time')
 plt.ylabel('Distance')
 plt.title('Distance between Mavs')
 plt.legend()
 
-plt.subplot(224)
-# plt.plot(relative_velocities[:,0], label='True Relative Velocity X')
-# plt.plot(relative_velocities[:,1], label='True Relative Velocity Y')
-plt.plot(est_relative_velocity_x, label='Estimated Intruder Vel N')
-plt.plot(est_relative_velocity_y, label='Estimated Intruder Vel E')
-plt.xlabel('Time')
-plt.ylabel('Relative Velocity')
-plt.title('Relative Velocity')
-plt.legend()
+# plt.subplot(224)
+# plt.plot(np.ones(len(est_relative_velocity_x))*intruder_vel[0], label='True Relative Velocity N')
+# plt.plot(np.ones(len(est_relative_velocity_y))*intruder_vel[1], label='True Relative Velocity E')
+# plt.plot(est_relative_velocity_x, label='Estimated Intruder Vel N')
+# plt.plot(est_relative_velocity_y, label='Estimated Intruder Vel E')
+# plt.xlabel('Time')
+# plt.ylabel('Relative Velocity')
+# plt.title('Relative Velocity')
+# plt.legend()
 
 plt.tight_layout()
 plt.show()
