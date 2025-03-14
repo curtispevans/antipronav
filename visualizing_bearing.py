@@ -5,9 +5,10 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
 
 mav1 = MavDynamics([-300., 0., 0., 30.], Ts)
-mav2 = MavDynamics([300., -300., np.pi, 30.], Ts)
+mav2 = MavDynamics([0., -300., np.pi/2, 30.], Ts)
 
 u = -0.05
+A = 20
 
 bearings = []
 bearings_vel = []
@@ -33,7 +34,7 @@ for i in range(500):
         bearings_vel.append((bearings[-1] - bearings[-2]) / Ts)
 
     rho = np.linalg.norm(mav2._state[0:2] - mav1._state[0:2])
-    pixel_size = 10 / rho
+    pixel_size = A / rho
     pixel_sizes.append(pixel_size)
     distances.append(rho)
 

@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.kalman_filter import kalman_update
+from models.kalman_filter_5_states import kalman_update
 from models.mav_dynamics import MavDynamics
 
 bearings = np.load('data/bearing.npy')
@@ -15,11 +15,11 @@ own_velocities = np.load('data/own_velocity.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
 
-mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), 0.001, 0., 30., 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .1, 0.1, 0.01]))
+mu = jnp.array([bearings[0], 0.001, 0., 30., 1./true_distance[0]])
+sigma = jnp.diag(jnp.array([jnp.radians(0.1), 1, .0000001, 0.000001, 0.01]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 1e-2]))
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))
+R = jnp.diag(jnp.array([jnp.radians(0.1), 1, 0.000001, 0.0000001, 1e-10]))
+Q = jnp.diag(jnp.array([jnp.radians(0.1), 1]))
 
 est_dist = []
 est_bearing = []
@@ -28,13 +28,13 @@ est_relative_velocity_x = []
 est_relative_velocity_y = []
 
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
-    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
+    measurement = jnp.array([bearing, pixel_size])
     mu, sigma = kalman_update(mu, sigma, own_vel, measurement, R, Q, Ts)
-    est_dist.append(mu[5])
-    est_bearing.append(np.arctan2(mu[1], mu[0]))
-    est_pixel_size.append(mu[2])
-    est_relative_velocity_x.append(mu[3])
-    est_relative_velocity_y.append(mu[4])
+    est_dist.append(mu[4])
+    est_bearing.append(mu[0])
+    est_pixel_size.append(mu[1])
+    est_relative_velocity_x.append(mu[2])
+    est_relative_velocity_y.append(mu[3])
 
 
 
