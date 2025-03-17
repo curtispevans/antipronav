@@ -1,6 +1,7 @@
 import numpy as np
 from jax import jacfwd
 import jax.numpy as jnp
+import jax
 
 def motion_model(x, own_vel, delta_t):
     '''
@@ -8,7 +9,7 @@ def motion_model(x, own_vel, delta_t):
     u: control vector u=[acceleration_x, acceleration_y]
     delta_t: time step
     '''
-    los_n, los_e, pixel_size, c_n, c_e, eta = x
+    los_n, los_e, pixel_size, c_n, c_e, eta, A = x
     v_n = c_n - own_vel[0]
     v_e = c_e - own_vel[1]
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
@@ -17,7 +18,9 @@ def motion_model(x, own_vel, delta_t):
                    -2*pixel_size*eta*bearing_dot_relative_velocity,
                    0,
                    0,
-                   -eta**2*bearing_dot_relative_velocity])
+                   -eta**2*pixel_size*bearing_dot_relative_velocity,
+                   -pixel_size*bearing_dot_relative_velocity])
+    
     return x + f*delta_t
 
 def jacobian_motion_model(x, own_vel, delta_t):
@@ -32,9 +35,9 @@ def measurement_model(x):
     '''
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
-    H = jnp.array([[1,0,0,0,0,0],
-                   [0,1,0,0,0,0],
-                   [0,0,1,0,0,0]])
+    H = jnp.array([[1,0,0,0,0,0,0],
+                   [0,1,0,0,0,0,0],
+                   [0,0,1,0,0,0,0]])
     return jnp.array([x[0], x[1], x[2]]), H
 
 def kalman_update(mu, sigma, own_vel, measurement, R, Q, delta_t):
@@ -53,5 +56,5 @@ def kalman_update(mu, sigma, own_vel, measurement, R, Q, delta_t):
     I = jnp.eye(len(K))
     sigma = (I - K@H)@sigma_bar@(I - K@H).T + K@Q@K.T
     sigma = (jnp.eye(len(K)) - K@H)@sigma_bar
-    
+
     return mu, sigma 
