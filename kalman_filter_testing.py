@@ -15,11 +15,11 @@ own_velocities = np.load('data/own_velocity.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
 
-mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), 0.001, 0., 30., 1./true_distance[0]])
+mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), pixel_sizes[0], 0., 30., 1./true_distance[0]])
 sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .1, 0.1, 0.01]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 1e-1]))
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 0.01]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.0001]))
 
 est_dist = []
 est_bearing = []
@@ -28,7 +28,7 @@ est_relative_velocity_x = []
 est_relative_velocity_y = []
 
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
-    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
+    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size, 0])
     mu, sigma = kalman_update(mu, sigma, own_vel, measurement, R, Q, Ts)
     est_dist.append(mu[5])
     est_bearing.append(np.arctan2(mu[1], mu[0]))

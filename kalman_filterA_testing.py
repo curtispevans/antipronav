@@ -18,8 +18,8 @@ intruder_vel = np.array([0., 30.])
 mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), 0.001, 0., 30., 1./true_distance[0], 20])
 sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .1, 0.1, 0.01, 10]))
 
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 1e-2, 20]))
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 0.1, 0.1]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.000001, 0.000001, 0.000001]))
 
 est_dist = []
 est_bearing = []
@@ -29,7 +29,7 @@ est_relative_velocity_y = []
 est_A = []
 
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
-    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size])
+    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size, 0, 0, 0])
     mu, sigma = kalman_update(mu, sigma, own_vel, measurement, R, Q, Ts)
     est_dist.append(mu[5])
     est_bearing.append(np.arctan2(mu[1], mu[0]))
@@ -65,22 +65,22 @@ plt.ylabel('Inverse Distance')
 plt.title('Inverse Distance between Mavs')
 plt.legend()
 
-# plt.subplot(224)
-# plt.plot(est_A, label='Estimated A')
-# plt.plot(np.ones(len(est_A))*20, label='True A')
-# plt.xlabel('Time')
-# plt.ylabel('A')
-# plt.title('A')
-# plt.legend()
-
-
 plt.subplot(224)
-plt.plot(true_distance, label='True Distance')
-plt.plot(1/np.array(est_dist), label='Estimated Distance')
+plt.plot(est_A, label='Estimated A')
+plt.plot(np.ones(len(est_A))*20, label='True A')
 plt.xlabel('Time')
-plt.ylabel('Distance')
-plt.title('Distance between Mavs')
+plt.ylabel('A')
+plt.title('A')
 plt.legend()
+
+
+# plt.subplot(224)
+# plt.plot(true_distance, label='True Distance')
+# plt.plot(1/np.array(est_dist), label='Estimated Distance')
+# plt.xlabel('Time')
+# plt.ylabel('Distance')
+# plt.title('Distance between Mavs')
+# plt.legend()
 
 
 # plt.subplot(224)
