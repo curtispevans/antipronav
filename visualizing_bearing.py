@@ -34,7 +34,7 @@ for i in range(500):
         bearings_vel.append((bearings[-1] - bearings[-2]) / Ts)
 
     rho = np.linalg.norm(mav2._state[0:2] - mav1._state[0:2])
-    pixel_size = A / rho
+    pixel_size = A / rho 
     pixel_sizes.append(pixel_size)
     distances.append(rho)
 

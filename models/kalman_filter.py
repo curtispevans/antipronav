@@ -14,7 +14,7 @@ def motion_model(x, own_vel, delta_t):
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
     f = jnp.array([eta*(los_e**2*v_n - los_n*los_e*v_e),
                    eta*(-los_n*los_e*v_n + los_n**2*v_e),
-                   -2*pixel_size*eta*bearing_dot_relative_velocity,
+                   -pixel_size*eta*bearing_dot_relative_velocity,
                    0,
                    0,
                    -eta**2*bearing_dot_relative_velocity])
@@ -36,7 +36,7 @@ def measurement_model(x, own_vel):
     v_n = c_n - own_vel[0]
     v_e = c_e - own_vel[1]
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
-    return jnp.array([los_n, los_e, pixel_size, -pixel_size*bearing_dot_relative_velocity])
+    return jnp.array([los_n, los_e, pixel_size])
 
 def jacobian_measurement_model(x, own_vel):
     '''
@@ -60,6 +60,6 @@ def kalman_update(mu, sigma, own_vel, measurement, R, Q, delta_t):
     mu = mu_bar + K@(measurement - z)
     I = jnp.eye(len(K))
     sigma = (I - K@H)@sigma_bar@(I - K@H).T + K@Q@K.T
-    sigma = (jnp.eye(len(K)) - K@H)@sigma_bar
+    # sigma = (jnp.eye(len(K)) - K@H)@sigma_bar
     
     return mu, sigma 

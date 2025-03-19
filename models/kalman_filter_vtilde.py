@@ -4,17 +4,13 @@ import jax.numpy as jnp
 import jax
 
 def f(x, own_vel):
-    los_n, los_e, pixel_size, c_n, c_e, eta, A = x
-    v_n = c_n - own_vel[0]
-    v_e = c_e - own_vel[1]
+    los_n, los_e, pixel_size, v_n, v_e = x
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
-    _f = jnp.array([eta*(los_e**2*v_n - los_n*los_e*v_e),
-                     eta*(-los_n*los_e*v_n + los_n**2*v_e),
-                     -pixel_size*eta*bearing_dot_relative_velocity,
-                     0,
-                     0,
-                     -eta**2*bearing_dot_relative_velocity,
-                    -0*pixel_size*bearing_dot_relative_velocity])
+    _f = jnp.array([(los_e**2*v_n - los_n*los_e*v_e),
+                     (-los_n*los_e*v_n + los_n**2*v_e),
+                     -2*pixel_size*bearing_dot_relative_velocity,
+                     -v_n*bearing_dot_relative_velocity,
+                     -v_e*bearing_dot_relative_velocity])
     return _f
 
 def motion_model(x, own_vel, delta_t):
@@ -38,11 +34,9 @@ def measurement_model(x, own_vel):
     '''
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
-    los_n, los_e, pixel_size, c_n, c_e, eta, A = x
-    v_n = c_n - own_vel[0]
-    v_e = c_e - own_vel[1]
+    los_n, los_e, pixel_size, v_n, v_e = x
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
-    return jnp.array([los_n, los_e, pixel_size, pixel_size - A*eta]) #, pixel_size*bearing_dot_relative_velocity])
+    return jnp.array([los_n, los_e, pixel_size]) #, pixel_size*bearing_dot_relative_velocity])
 
 def jacobian_measurement_model(x, own_vel):
     return jacfwd(measurement_model, argnums=0)(x, own_vel)
