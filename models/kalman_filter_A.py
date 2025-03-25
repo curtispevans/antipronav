@@ -82,7 +82,7 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, R_psuedo, delta_t):
     H_psuedo = jacobian_psuedo_measurement_model(mu_bar, own_vel)
     S_psuedo = H_psuedo@sigma@H_psuedo.T + R_psuedo
     K_psuedo = sigma@H_psuedo.T@np.linalg.inv(S_psuedo)
-    mu = mu + K_psuedo@(measurement_psuedo - measurement_psuedo)
+    mu = mu + K_psuedo@(jnp.array([0.]) - measurement_psuedo)
     I_psuedo = jnp.eye(len(K_psuedo))
     sigma = (I_psuedo - K_psuedo@H_psuedo)@sigma@(I_psuedo - K_psuedo@H_psuedo).T + K_psuedo@R_psuedo@K_psuedo.T
     

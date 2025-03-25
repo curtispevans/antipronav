@@ -5,10 +5,10 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
 
 mav1 = MavDynamics([-300., 0., 0., 30.], Ts)
-mav2 = MavDynamics([0., -300., np.pi, 0.], Ts)
+mav2 = MavDynamics([0., -300., np.pi/2, 30.], Ts)
 
 u = -0.05
-A = 20
+A = 15
 
 bearings = []
 bearings_vel = []
@@ -38,12 +38,12 @@ for i in range(500):
     pixel_sizes.append(pixel_size)
     distances.append(rho)
 
-    rel_vel_own = mav1._state[3]*np.array([np.cos(mav1._state[2]), np.sin(mav1._state[2])])
+    own_vel = mav1._state[3]*np.array([np.cos(mav1._state[2]), np.sin(mav1._state[2])])
     rel_vel_intruder = mav2._state[3]*np.array([np.cos(mav2._state[2]), np.sin(mav2._state[2])])
-    relative_velocity = rel_vel_intruder - rel_vel_own
+    relative_velocity = rel_vel_intruder - own_vel
     relative_velocities.append(relative_velocity)
 
-    own_velocities.append(rel_vel_own)
+    own_velocities.append(own_vel)
 
     plt.plot(mav1._state[1], mav1._state[0], 'ro')
     plt.plot(mav2._state[1], mav2._state[0], 'bo')
