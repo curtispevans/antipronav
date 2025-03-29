@@ -7,7 +7,7 @@ Ts = 1/30
 mav1 = MavDynamics([-300., 0., 0., 30.], Ts)
 mav2 = MavDynamics([0., -300., np.pi/2, 30.], Ts)
 
-u = -0.05
+u = -0.5
 A = 15
 
 bearings = []

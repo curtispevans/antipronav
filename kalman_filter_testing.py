@@ -16,7 +16,7 @@ Ts = 1/30
 intruder_vel = np.array([0., 30.])
 
 mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), pixel_sizes[0], 0., 30., 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, .1, 0.1, 0.01]))
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, .1, 0.1, 0.01]))
 
 R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.01, 0.01, 0.01]))
 Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1]))

@@ -18,10 +18,11 @@ intruder_heading = np.pi/2
 A = 15
 
 mu = jnp.array([jnp.cos(bearings[0]-np.radians(0.1)), jnp.sin(bearings[0]+np.radians(0.1)), pixel_sizes[0], 30*np.cos(intruder_heading), 30.*np.sin(intruder_heading), 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01]))
+sigma = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01]))
 
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.01, 0.01, 0.01]))
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.0001]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1)), jnp.sin(jnp.radians(0.1)), 0.1, 0.1, 0.1, 0.1]))
+# Q = jnp.eye(6)*0.1
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 0.01, 0.0001]))
 R_psuedo = jnp.diag(jnp.array([0.000001]))
 
 est_dist = []

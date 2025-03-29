@@ -27,12 +27,12 @@ A = 20
 mu20 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 20])
 mu15 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 15])
 mu10 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 10])
-sigma20 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 5]))
-sigma15 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 5]))
-sigma10 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 5]))
+sigma20 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 15]))
+sigma15 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 10]))
+sigma10 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 5]))
 
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.01, 0.01, 0.01, 5]))
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.cos(jnp.radians(0.01)), 0.01, 0.0001]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001))**2, jnp.sin(jnp.radians(0.0011))**2, 0.1, 0.1, 0.1, 0.1, 0.0001]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 0.01, 0.0000001]))
 
 est_dist20 = []
 est_bearing20 = []

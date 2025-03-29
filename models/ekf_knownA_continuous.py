@@ -41,7 +41,8 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, R_psuedo, delta_t, A=15
     mu = mu + delta_t*f(mu, own_vel, A)
     J = jacobian_f(mu, own_vel, A)
     Jd = np.eye(len(mu)) + delta_t*J + 0.5*delta_t**2*J@J
-    sigma = Jd @ sigma @ Jd.T + delta_t**2*Q
+    # sigma = Jd @ sigma @ Jd.T + delta_t**2*Q
+    sigma = Jd @ sigma @ Jd.T + Q
 
     mu_bar = mu
     sigma_bar = sigma
