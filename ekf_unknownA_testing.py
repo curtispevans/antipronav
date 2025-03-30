@@ -16,8 +16,8 @@ Ts = 1/30
 intruder_vel = np.array([0., 30.])
 intruder_heading = np.pi/2
 
-los_n = jnp.cos(bearings[0]-np.radians(0.1))
-los_e = jnp.sin(bearings[0]+np.radians(0.1))
+los_n = jnp.cos(bearings[0])
+los_e = jnp.sin(bearings[0])
 pixel_size = pixel_sizes[0]
 c_n = 30*np.cos(intruder_heading)
 c_e = 30.*np.sin(intruder_heading)
@@ -27,12 +27,16 @@ A = 20
 mu20 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 20])
 mu15 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 15])
 mu10 = jnp.array([los_n, los_e, pixel_size, c_n, c_e, eta, 10])
-sigma20 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 15]))
-sigma15 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 10]))
-sigma10 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 1, 0.1, 0.1, 0.01, 5]))
+sigma20 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 1**2, 
+                              0.1**2, 0.1**2, 0.01**2, 15**2]))
+sigma15 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 1**2, 
+                              0.1**2, 0.1**2, 0.01**2, 10**2]))
+sigma10 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 1**2, 
+                              0.1**2, 0.1**2, 0.01**2, 5**2]))
 
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001))**2, jnp.sin(jnp.radians(0.0011))**2, 0.1, 0.1, 0.1, 0.1, 0.0001]))
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01)), jnp.sin(jnp.radians(0.01)), 0.01, 0.0000001]))
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001))**2, jnp.sin(jnp.radians(0.0011))**2, 0.1**2, 
+                        0.1**2, 0.1**2, 0.1**2, 0.0001**2]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 0.01**2, 0.0000001**2]))
 
 est_dist20 = []
 est_bearing20 = []
