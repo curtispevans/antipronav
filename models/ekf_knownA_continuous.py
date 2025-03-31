@@ -30,7 +30,7 @@ def measurement_model(x, A=15):
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
     los_n, los_e, pixel_size, c_n, c_e, eta = x
-    return jnp.array([los_n, los_e, pixel_size, pixel_size - A*eta, jnp.sqrt(los_n**2 + los_e**2) - 1])
+    return jnp.array([los_n, los_e, pixel_size, pixel_size - A*eta, (los_n**2 + los_e**2) - 1])
 
 
 def jacobian_measurement_model(x, A=15):

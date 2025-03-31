@@ -5,9 +5,9 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
 
 mav1 = MavDynamics([-300., 0., 0., 30.], Ts)
-mav2 = MavDynamics([0., -300., np.pi/2, 30.], Ts)
+mav2 = MavDynamics([0., -500., np.pi/2, 30.], Ts)
 
-u = -0.05
+u = -0.5
 A = 15
 
 bearings = []
@@ -18,7 +18,7 @@ control = []
 relative_velocities = []
 own_velocities = []
 
-for i in range(900):
+for i in range(400):
     mav1.update(u)
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])
