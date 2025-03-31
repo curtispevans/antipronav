@@ -34,9 +34,9 @@ sigma15 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians
 sigma10 = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 1**2, 
                               0.1**2, 0.1**2, 0.01**2, 5**2]))
 
-Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.001))**2, jnp.sin(jnp.radians(0.0011))**2, 0.1**2, 
+Q = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1))**2, jnp.sin(jnp.radians(0.1))**2, 0.1**2, 
                         0.1**2, 0.1**2, 0.1**2, 0.0001**2]))
-R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.01))**2, jnp.sin(jnp.radians(0.01))**2, 0.01**2, 0.0000001**2]))
+R = jnp.diag(jnp.array([jnp.cos(jnp.radians(0.1))**2, jnp.sin(jnp.radians(0.1))**2, 0.01**2, 0.0001**2, 0.0001**2]))
 
 est_dist20 = []
 est_bearing20 = []
@@ -66,7 +66,7 @@ std_inverse_distance10 = []
 det_bearing10 = []
 
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
-    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size, 0.0])
+    measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size, 0.0, 0.0])
 
     mu20, sigma20 = kalman_update(mu20, sigma20, own_vel, measurement, Q, R, Ts)
     est_dist20.append(mu20[5])
