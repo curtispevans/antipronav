@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import jax
 
 def f(x, own_vel, A=15):
-    los_n, los_e, pixel_size, c_n, c_e, eta= x
+    los_n, los_e, pixel_size, c_n, c_e, eta = x
     v_n = c_n - own_vel[0]
     v_e = c_e - own_vel[1]
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
@@ -38,6 +38,8 @@ def jacobian_measurement_model(x, A=15):
 
 def kalman_update(mu, sigma, own_vel, measurement, Q, R, R_psuedo, delta_t, A=15):
     # Prediction
+    if mu[0] < 0.1:
+        print(mu[0], f(mu, own_vel, A)[0])
     mu = mu + delta_t*f(mu, own_vel, A)
     J = jacobian_f(mu, own_vel, A)
     Jd = np.eye(len(mu)) + delta_t*J + 0.5*delta_t**2*J@J

@@ -14,7 +14,7 @@ own_velocities = np.load('data/own_velocity.npy')
 
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
-intruder_heading = -np.pi/2
+intruder_heading = np.pi/2
 A = 15
 
 mu = jnp.array([jnp.cos(bearings[0]), jnp.sin(bearings[0]), pixel_sizes[0], 30*np.cos(intruder_heading), 30.*np.sin(intruder_heading), 1./true_distance[0]])
@@ -38,7 +38,7 @@ std_inverse_distance = []
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
     measurement = jnp.array([jnp.cos(bearing), jnp.sin(bearing), pixel_size, 0.0, 0.0])
     mu, sigma = kalman_update(mu, sigma, own_vel, measurement, Q, R, R_psuedo, Ts, A)
-    print(np.linalg.norm(mu[:2]))
+    # print(np.linalg.norm(mu[:2]))
     est_dist.append(mu[5])
     est_bearing.append(np.arctan2(mu[1], mu[0]))
     est_cos_sin.append(mu[:2])
@@ -122,13 +122,13 @@ plt.figure(3)
 plt.subplot(121)
 plt.plot(np.cos(bearings), label='True Cos')
 plt.plot(np.array(est_cos_sin)[:, 0], label='Estimated Cos')
-plt.title('Bearing between Mavs')
+plt.title('State 1 Cos')
 plt.legend()
 
 plt.subplot(122)
 plt.plot(np.sin(bearings), label='True Sin')
 plt.plot(np.array(est_cos_sin)[:, 1], label='Estimated Sin')
-plt.title('Bearing between Mavs')
+plt.title('State 2 Sin')
 plt.legend()
 
 plt.tight_layout()
