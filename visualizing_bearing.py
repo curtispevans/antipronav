@@ -18,7 +18,7 @@ control = []
 relative_velocities = []
 own_velocities = []
 
-for i in range(500):
+for i in range(900):
     mav1.update(u)
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])
