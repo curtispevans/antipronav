@@ -81,7 +81,11 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, delta_t, A=15):
     S = H@sigma_bar@H.T + R
     K = sigma_bar@H.T@np.linalg.inv(S)
     # TODO fix the wrapping of the angle
-    mu_bar = mu_bar + K@(measurement - z)
+    # innovation = wrap(measurement - z, dim=0)
+    innovation = np.array(measurement - z)
+    innovation[0] = wrap(innovation[0])
+    # print(innovation)
+    mu_bar = mu_bar + K@(innovation)
     I = jnp.eye(len(K))
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
@@ -90,3 +94,9 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, delta_t, A=15):
     
     return mu, sigma 
 
+def wrap(angle, dim=None):
+    if dim:
+        angle[dim] -= 2*np.pi * np.floor((angle[dim] + np.pi) / (2*np.pi))
+    else:
+        angle -= 2*np.pi * np.floor((angle + np.pi) / (2*np.pi))
+    return angle
