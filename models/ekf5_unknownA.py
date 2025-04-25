@@ -19,7 +19,7 @@ def f(x, own_vel):
                    0,
                    0,
                    -eta*pixel_size*bearing_dot_relative_velocity/A, 
-                   (eta**2 - eta*pixel_size/A)*bearing_dot_relative_velocity/pixel_size])
+                   (pixel_size**2/A - pixel_size*eta)*bearing_dot_relative_velocity/eta])
     return f_
 
 
@@ -64,7 +64,9 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, delta_t):
     I = jnp.eye(len(K))
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
-    mu = mu_bar
+    
+    mu = np.array(mu_bar)
+    mu[0] = wrap(mu[0])
     sigma = sigma_bar
     
     return mu, sigma 

@@ -89,7 +89,8 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, delta_t, A=15):
     I = jnp.eye(len(K))
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
-    mu = mu_bar
+    mu = np.array(mu_bar)
+    mu[0] = wrap(mu[0])
     sigma = sigma_bar
     
     return mu, sigma 

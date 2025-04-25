@@ -5,17 +5,36 @@ import matplotlib.pyplot as plt
 from models.kalman_filter_5_states import kalman_update
 from models.mav_dynamics import MavDynamics
 
+def get_own_pose_and_intruder_pose(mav1, distance, bearing):
+    # Get the position of the intruder
+    intruder_pos = mav1[0:2] + distance * np.array([np.cos(bearing + mav1[2]), np.sin(bearing + mav1[2])])
+
+    return mav1[0:2], intruder_pos
+
+
+
+def get_all_own_poses_and_intruder_poses(mav1_list, distances, bearings):
+    # Get the position of the intruder
+    mav1_poses = []
+    intruder_poses = []
+    for mav1, distance, bearing in zip(mav1_list, distances, bearings):
+        mav1_pose, intruder_pose = get_own_pose_and_intruder_pose(mav1, distance, bearing)
+        mav1_poses.append(mav1_pose)
+        intruder_poses.append(intruder_pose)
+    return mav1_poses, intruder_poses
+
 bearings = np.load('data/bearing.npy')
 pixel_sizes = np.load('data/pixel_sizes.npy')
 true_distance = np.load('data/distances.npy')
 control = np.load('data/control.npy')
 relative_velocities = np.load('data/relative_velocity.npy')
 own_velocities = np.load('data/own_velocity.npy')
+mav_states = np.load('data/mav_state.npy')
 
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
 intruder_heading = np.pi/2
-A = 15
+A = 17
 
 mu = jnp.array([bearings[0], pixel_sizes[0], 30*np.cos(intruder_heading), 30.*np.sin(intruder_heading), 1./true_distance[0]])
 sigma = jnp.diag(jnp.array([jnp.radians(0.1), 1, 0.1, 0.1, 0.01]))**2
@@ -113,6 +132,15 @@ plt.plot(std_inverse_distance, label='Std Inverse Distance')
 plt.xlabel('Time')
 plt.ylabel('Std Inverse Distance')
 plt.title('Std Inverse Distance')
+plt.tight_layout()
+
+plt.figure(3)
+mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, true_distance, bearings)
+plt.plot([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], 'ro', label='Mav 1')
+plt.plot([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], 'bo', label='Intruder True')
+mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, 1/np.array(est_dist), est_bearing)
+plt.plot([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], 'go', label='Intruder Est')
+plt.legend()
 
 plt.tight_layout()
 plt.show()
