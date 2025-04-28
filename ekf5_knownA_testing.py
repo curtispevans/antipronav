@@ -34,7 +34,7 @@ mav_states = np.load('data/mav_state.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 30.])
 intruder_heading = np.pi/2
-A = 17
+A = 20
 
 mu = jnp.array([bearings[0], pixel_sizes[0], 30*np.cos(intruder_heading), 30.*np.sin(intruder_heading), 1./true_distance[0]])
 sigma = jnp.diag(jnp.array([jnp.radians(0.1), 1, 0.1, 0.1, 0.01]))**2
