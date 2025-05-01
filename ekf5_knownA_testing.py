@@ -47,8 +47,8 @@ R_psuedo = jnp.diag(jnp.array([0.000001]))
 est_dist = []
 est_bearing = []
 est_pixel_size = []
-est_relative_velocity_x = []
-est_relative_velocity_y = []
+est_cn = []
+est_ce = []
 std_bearing = []
 std_pixel_size = []
 std_inverse_distance = []
@@ -60,8 +60,8 @@ for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
     est_dist.append(mu[4])
     est_bearing.append(mu[0])
     est_pixel_size.append(mu[1])
-    est_relative_velocity_x.append(mu[2])
-    est_relative_velocity_y.append(mu[3])
+    est_cn.append(mu[2])
+    est_ce.append(mu[3])
     std_bearing.append(np.sqrt(sigma[0, 0]))
     std_pixel_size.append(np.sqrt(sigma[1, 1]))
     std_inverse_distance.append(np.sqrt(sigma[4, 4]))
@@ -94,23 +94,23 @@ plt.title('Inverse Distance between Mavs')
 plt.legend()
 
 
-plt.subplot(224)
-plt.plot(true_distance, label='True Distance')
-plt.plot(1/np.array(est_dist), label='Estimated Distance')
-plt.xlabel('Time')
-plt.ylabel('Distance')
-plt.title('Distance between Mavs')
-plt.legend()
-
 # plt.subplot(224)
-# plt.plot(np.ones(len(est_relative_velocity_x))*intruder_vel[0], label='True Relative Velocity N')
-# plt.plot(np.ones(len(est_relative_velocity_y))*intruder_vel[1], label='True Relative Velocity E')
-# plt.plot(est_relative_velocity_x, label='Estimated Intruder Vel N')
-# plt.plot(est_relative_velocity_y, label='Estimated Intruder Vel E')
+# plt.plot(true_distance, label='True Distance')
+# plt.plot(1/np.array(est_dist), label='Estimated Distance')
 # plt.xlabel('Time')
-# plt.ylabel('Relative Velocity')
-# plt.title('Relative Velocity')
+# plt.ylabel('Distance')
+# plt.title('Distance between Mavs')
 # plt.legend()
+
+plt.subplot(224)
+plt.plot(np.ones(len(est_cn))*intruder_vel[0], label='True Relative Velocity N')
+plt.plot(np.ones(len(est_ce))*intruder_vel[1], label='True Relative Velocity E')
+plt.plot(est_cn, label='Estimated Intruder Vel N')
+plt.plot(est_ce, label='Estimated Intruder Vel E')
+plt.xlabel('Time')
+plt.ylabel('Relative Velocity')
+plt.title('Relative Velocity')
+plt.legend()
 
 plt.tight_layout()
 
