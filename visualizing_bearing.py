@@ -4,8 +4,8 @@ from models.mav_dynamics import MavDynamics
 
 Ts = 1/30
 
-mav1 = MavDynamics([-300., 0., 0, 30.], Ts)
-mav2 = MavDynamics([-300., 0., np.pi/2, 1.], Ts)
+mav1 = MavDynamics([-30., 0., 0, 30.], Ts)
+mav2 = MavDynamics([-20., 40., np.pi/2, 0.], Ts)
 
 u = 0.7
 A = 15
@@ -19,7 +19,7 @@ relative_velocities = []
 own_velocities = []
 mav_state = []
 
-for i in range(400):
+for i in range(400):    
     mav1.update(u)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
     mav2.update(0.0)

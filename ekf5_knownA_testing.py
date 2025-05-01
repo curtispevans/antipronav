@@ -32,12 +32,12 @@ own_velocities = np.load('data/own_velocity.npy')
 mav_states = np.load('data/mav_state.npy')
 
 Ts = 1/30
-intruder_vel = np.array([0., 30.])
+intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 14
+A = 15
 
-mu = jnp.array([bearings[0], pixel_sizes[0], 1*np.cos(intruder_heading), 1.*np.sin(intruder_heading), 1./true_distance[0]])
-sigma = jnp.diag(jnp.array([jnp.radians(0.1), 1, 1, 1, 0.01]))**2
+mu = jnp.array([bearings[0], pixel_sizes[0], 0*np.cos(intruder_heading), 0.*np.sin(intruder_heading), 1./true_distance[0]])
+sigma = jnp.diag(jnp.array([jnp.radians(0.1), 1, .001, .001, 0.01]))**2
 
 Q = jnp.diag(jnp.array([jnp.radians(0.01), 0.1, 0.000001, 0.000001, 0.1]))**2
 # Q = jnp.eye(6)*0.1
@@ -51,6 +51,7 @@ est_cn = []
 est_ce = []
 std_bearing = []
 std_pixel_size = []
+std_int_vel = []
 std_inverse_distance = []
 
 for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
@@ -64,6 +65,7 @@ for bearing, pixel_size, own_vel in zip(bearings, pixel_sizes, own_velocities):
     est_ce.append(mu[3])
     std_bearing.append(np.sqrt(sigma[0, 0]))
     std_pixel_size.append(np.sqrt(sigma[1, 1]))
+    std_int_vel.append(np.linalg.det(sigma[2:4, 2:4]))
     std_inverse_distance.append(np.sqrt(sigma[4, 4]))
 
 
@@ -132,6 +134,14 @@ plt.plot(std_inverse_distance, label='Std Inverse Distance')
 plt.xlabel('Time')
 plt.ylabel('Std Inverse Distance')
 plt.title('Std Inverse Distance')
+# plt.tight_layout()
+
+plt.subplot(224)
+plt.plot(std_int_vel, label='Std Intruder Vel')
+plt.xlabel('Time')
+plt.ylabel('Std Intruder Vel')
+plt.title('Std Intruder Vel')
+plt.legend()
 plt.tight_layout()
 
 plt.figure(3)

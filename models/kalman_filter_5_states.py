@@ -21,32 +21,6 @@ def f(x, own_vel, A=15):
                    -eta*pixel_size*bearing_dot_relative_velocity/A])
     return f_
 
-def motion_model(x, own_vel, delta_t, A=15):
-    '''
-    x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
-    u: control vector u=[acceleration_x, acceleration_y]
-    delta_t: time step
-    '''
-    theta, pixel_size, c_n, c_e, eta = x
-    los_n = jnp.cos(theta)
-    los_e = jnp.sin(theta)
-    v_n = c_n - own_vel[0]
-    v_e = c_e - own_vel[1]
-    bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
-    f = jnp.array([eta*(-los_e*v_n + los_n*v_e),
-                   -pixel_size*eta*bearing_dot_relative_velocity,
-                   0,
-                   0,
-                   -eta*pixel_size*bearing_dot_relative_velocity/A])
-    return x + f*delta_t
-
-def jacobian_motion_model(x, own_vel, delta_t):
-    '''
-    x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
-    u: control vector u=[acceleration_x, acceleration_y]
-    delta_t: time step
-    '''
-    return jacfwd(motion_model, argnums=0)(x, own_vel, delta_t)
 
 def jacobian_f(x, own_vel, A=15):
     return jacfwd(f, argnums=0)(x, own_vel, A)
@@ -80,7 +54,6 @@ def kalman_update(mu, sigma, own_vel, measurement, Q, R, delta_t, A=15):
     H = jacobian_measurement_model(mu_bar, A)
     S = H@sigma_bar@H.T + R
     K = sigma_bar@H.T@np.linalg.inv(S)
-    # TODO fix the wrapping of the angle
     # innovation = wrap(measurement - z, dim=0)
     innovation = np.array(measurement - z)
     innovation[0] = wrap(innovation[0])
