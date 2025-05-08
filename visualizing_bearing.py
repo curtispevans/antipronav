@@ -4,10 +4,10 @@ from models.mav_dynamics import MavDynamics
 
 Ts = 1/30
 
-mav1 = MavDynamics([-30., 0., 0, 30.], Ts)
-mav2 = MavDynamics([-20., 40., np.pi/2, 5.], Ts)
+mav1 = MavDynamics([-1000., 0., 0, 30.], Ts)
+mav2 = MavDynamics([0., 0., 3*np.pi/4, 10.], Ts)
 
-u = 0.7
+u = -0.07
 A = 15
 
 bearings = []
@@ -20,7 +20,19 @@ own_velocities = []
 mav_state = []
 us = []
 
-for i in range(400):  
+for i in range(1000): 
+    if i < 100:
+        u = -0.7
+    elif i < 300:
+        u = 0.7
+    elif i < 500:
+        u = -0.7 
+    elif i < 700:
+        u = 0.7
+    elif i < 900:
+        u = -0.7
+    else:
+        u = 0.7
     us.append(u)  
     mav1.update(u)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))

@@ -35,14 +35,15 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 30
+A = 20
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0], pixel_sizes[0], A])
-sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.001, 1]))**2
+sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.001, 0.8]))**2
 
-Q = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.001, 0.0001]))**2
+Q = np.diag(np.array([np.radians(1e-6), 1e-6, np.radians(0.1), 1e-4, 0.1, 1e-9]))**2
 # Q = jnp.eye(6)*0.1
-R = np.diag(np.array([np.radians(0.001), 0.001, 0.00001]))**2
+R = np.diag(np.array([np.radians(0.001), 0.001, 1e-9]))**2
+# R = np.diag(np.array([np.radians(0.001), 0.001]))**2
 R_psuedo = np.diag(np.array([0.000001]))
 
 est_dist = []
@@ -59,6 +60,7 @@ est_A = []
 
 for bearing, pixel_size, own_mav, u in zip(bearings, pixel_sizes, mav_states, us):
     measurement = np.array([bearing, pixel_size, 0.0])
+    # measurement = np.array([bearing, pixel_size])
     mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
     # print(np.linalg.norm(mu[:2]))
     est_dist.append(mu[3])

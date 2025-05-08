@@ -38,6 +38,7 @@ def measurement_model(x):
     '''
     beta_dot, r_dot_over_r, beta, one_over_r, alpha, A = x
     return np.array([beta, alpha, alpha - A*one_over_r])
+    # return np.array([beta, alpha])
 
 def jacobian_measurement_model(x):
     '''
@@ -47,6 +48,8 @@ def jacobian_measurement_model(x):
     H = np.array([[0, 0, 1, 0, 0, 0],
                   [0, 0, 0, 0, 1, 0],
                   [0, 0, 0, -A, 1, -one_over_r]])
+    # H = np.array([[0, 0, 1, 0, 0, 0],
+    #               [0, 0, 0, 0, 1, 0]])
     return H
 
 def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t):

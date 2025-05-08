@@ -35,9 +35,9 @@ us = np.load('data/us.npy')
 Ts = 1/30
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0]])
-sigma = np.diag(np.array([np.radians(0.1), 1, np.radians(0.1), .001]))**2
+sigma = np.diag(np.array([np.radians(0.01), 0.001, np.radians(0.01), .001]))**2
 
-Q = np.diag(np.array([np.radians(0.001), 0.00001, np.radians(0.001), 0.00000001]))**2
+Q = np.diag(np.array([np.radians(0.001), 0.001, np.radians(0.001), 0.001]))**2
 # Q = jnp.eye(6)*0.1
 R = np.diag(np.array([[np.radians(0.01)]]))**2
 R_psuedo = np.diag(np.array([0.000001]))
