@@ -11,7 +11,7 @@ def f(x, own_mav, u):
     f_ = np.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)),
                     beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ae*np.sin(beta) + -an*np.cos(beta)),
                     beta_dot,
-                   -r_dot_over_r * one_over_r])
+                    -r_dot_over_r * one_over_r])
     return f_
 
 
@@ -54,7 +54,7 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t):
     # Update measurement
     z = measurement_model(mu_bar)
     H = jacobian_measurement_model(mu_bar)
-    S = H@sigma_bar@H.T + R.reshape(-1,1)
+    S = H@sigma_bar@H.T + R
     K = sigma_bar@H.T@np.linalg.inv(S)
     # innovation = wrap(measurement - z, dim=0)
     innovation = measurement - z
@@ -62,15 +62,15 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t):
     # innovation[2] = wrap(innovation[2])
     # print(innovation)
     # print(K @ innovation.flatten())
-    mu_bar = mu_bar + K @ innovation.flatten()
+    mu_bar = mu_bar + K @ innovation
     # print(mu_bar)
     I = np.eye(len(K))
-    # print(K.shape, R.reshape(-1,1).shape, K.T.shape)
+    # print(K.shape, R.shape, K.T.shape)
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R.reshape(-1,1)@K.T
 
     mu = np.array(mu_bar)
-    mu[0] = wrap(mu[0])
-    mu[2] = wrap(mu[2])
+    # mu[0] = wrap(mu[0])
+    # mu[2] = wrap(mu[2])
     sigma = sigma_bar
     
     return mu, sigma 

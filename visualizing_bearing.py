@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from models.mav_dynamics import MavDynamics
 
 Ts = 1/30
-
+                # north, east, heading, speed
 mav1 = MavDynamics([-1000., 0., 0, 30.], Ts)
-mav2 = MavDynamics([0., 0., 3*np.pi/4, 10.], Ts)
+mav2 = MavDynamics([0., -300., np.pi/2, 10.], Ts)
 
 u = -0.07
 A = 15

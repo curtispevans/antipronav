@@ -66,7 +66,6 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=15):
     # innovation = wrap(measurement - z, dim=0)
     innovation = np.array(measurement - z)
     innovation[0] = wrap(innovation[0])
-    innovation[2] = wrap(innovation[2])
     # print(innovation)
     mu_bar = mu_bar + K@(innovation)
     I = jnp.eye(len(K))

@@ -35,10 +35,10 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 20
+A = 15
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0], pixel_sizes[0], A])
-sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.001, 0.8]))**2
+sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.001, 0.001]))**2
 
 Q = np.diag(np.array([np.radians(1e-6), 1e-6, np.radians(0.1), 1e-4, 0.1, 1e-9]))**2
 # Q = jnp.eye(6)*0.1
@@ -58,7 +58,7 @@ std_inverse_distance = []
 std_A = []
 est_A = []
 
-for bearing, pixel_size, own_mav, u in zip(bearings, pixel_sizes, mav_states, us):
+for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_states[1:], us[1:]):
     measurement = np.array([bearing, pixel_size, 0.0])
     # measurement = np.array([bearing, pixel_size])
     mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
@@ -139,11 +139,19 @@ plt.tight_layout()
 
 plt.figure(3)
 mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, true_distance, bearings)
-plt.plot([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], 'ro', label='Mav 1')
-plt.plot([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], 'bo', label='Intruder True')
-mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, 1/np.array(est_dist), est_bearing)
-plt.plot([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], 'go', label='Intruder Est')
-plt.legend()
+plt.scatter([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], c='r', marker='o', label='Mav 1')
+plt.scatter([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], c='b', marker='o', label='Intruder True')
+mav_poses, intruder_poses_est = get_all_own_poses_and_intruder_poses(mav_states, 1/np.array(est_dist), est_bearing)
+plt.scatter([intruder[1] for intruder in intruder_poses_est], [intruder[0] for intruder in intruder_poses_est], c='g', marker='o', label='Intruder Est')
+
+
+for i in range(0, len(intruder_poses),30):
+    x_mav, y_mav = mav_poses[i][1], mav_poses[i][0]
+    x_true, y_true = intruder_poses[i][1], intruder_poses[i][0]
+    x_est, y_est = intruder_poses_est[i][1], intruder_poses_est[i][0]
+    plt.plot([x_mav, x_true], [y_mav, y_true], 'r--', linewidth=1)
+    plt.plot([x_true, x_est], [y_true, y_est], 'k--', linewidth=1)
+
 
 plt.tight_layout()
 plt.show()
