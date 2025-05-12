@@ -34,10 +34,10 @@ us = np.load('data/us.npy')
 
 Ts = 1/30
 
-mu = np.array([0, 0.5, bearings[0], 1./true_distance[0]])
-sigma = np.diag(np.array([np.radians(0.001), 0.001, np.radians(0.01), 0.001]))**2
+mu = np.array([0, 0, bearings[0], 1./true_distance[0]])
+sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.001]))**2
 
-Q = np.diag(np.array([np.radians(0.001), 0.001, np.radians(0.001), 0.0001]))**2
+Q = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01]))**2
 # Q = jnp.eye(6)*0.1
 R = np.diag(np.array([[np.radians(0.01)]]))**2
 R_psuedo = np.diag(np.array([0.000001]))
@@ -126,7 +126,7 @@ plt.figure(3)
 mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, true_distance, bearings)
 plt.scatter([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], c='r', marker='o', label='Mav 1')
 plt.scatter([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], c='b', marker='o', label='Intruder True')
-mav_poses, intruder_poses_est = get_all_own_poses_and_intruder_poses(mav_states, 1/np.array(est_dist), est_bearing)
+mav_poses, intruder_poses_est = get_all_own_poses_and_intruder_poses(mav_states[1:], 1/np.array(est_dist), est_bearing)
 plt.scatter([intruder[1] for intruder in intruder_poses_est], [intruder[0] for intruder in intruder_poses_est], c='g', marker='o', label='Intruder Est')
 
 

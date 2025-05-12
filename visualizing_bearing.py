@@ -5,7 +5,7 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-1000., 0., 0, 30.], Ts)
-mav2 = MavDynamics([0., -300., np.pi/2, 10.], Ts)
+mav2 = MavDynamics([-500., 0., 0, 10.], Ts)
 
 u = -0.07
 A = 15
@@ -21,16 +21,26 @@ mav_state = []
 us = []
 
 for i in range(1000): 
-    if i < 100:
+    if i < 50:
         u = -0.7
+    elif i < 100:
+        u = 0.0
+    elif i < 200:
+        u = 0.7
     elif i < 300:
-        u = 0.7
-    elif i < 500:
-        u = -0.7 
-    elif i < 700:
-        u = 0.7
-    elif i < 900:
+        u = 0.0
+    elif i < 400:
         u = -0.7
+    elif i < 500:
+        u = 0.0
+    elif i < 600:
+        u = 0.7
+    elif i < 700:
+        u = 0.0
+    elif i < 800:
+        u = -0.7
+    elif i < 900:
+        u = 0.0
     else:
         u = 0.7
     us.append(u)  
