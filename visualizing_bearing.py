@@ -4,8 +4,8 @@ from models.mav_dynamics import MavDynamics
 
 Ts = 1/30
                 # north, east, heading, speed
-mav1 = MavDynamics([-1000., 0., 0, 30.], Ts)
-mav2 = MavDynamics([-500., 0., 0, 10.], Ts)
+mav1 = MavDynamics([0., -100., 0, 25.], Ts)
+mav2 = MavDynamics([0., 0., 0, 0.], Ts)
 
 u = -0.07
 A = 15
@@ -20,7 +20,7 @@ own_velocities = []
 mav_state = []
 us = []
 
-for i in range(1000): 
+for i in range(500): 
     if i < 50:
         u = -0.7
     elif i < 100:
@@ -43,8 +43,8 @@ for i in range(1000):
         u = 0.0
     else:
         u = 0.7
-    us.append(u)  
-    mav1.update(u)
+    us.append(0.26)  
+    mav1.update(0.26)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])

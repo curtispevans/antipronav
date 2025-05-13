@@ -2,12 +2,14 @@ import numpy as np
 
 def f(x, own_mav, u):
     '''
-    x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
-    u: control vector u=[acceleration_x, acceleration_y]
+    x: state vector x=[beta_dot, r_dot_over_r, beta, one_over_r]
+    u: control vector u=angular_velocity
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
     an = -own_mav[3]*u*np.sin(own_mav[2])
     ae = own_mav[3]*u*np.cos(own_mav[2])
+    # an = u * np.cos(own_mav[2])
+    # ae = u * np.sin(own_mav[2])
     f_ = np.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)),
                     beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ae*np.sin(beta) + -an*np.cos(beta)),
                     beta_dot,
@@ -19,22 +21,28 @@ def jacobian_f(x, own_mav, u):
     beta_dot, r_dot_over_r, beta, one_over_r = x
     an = -own_mav[3]*u*np.sin(own_mav[2])
     ae = own_mav[3]*u*np.cos(own_mav[2])
-    J = np.array([[-2*r_dot_over_r, 2*beta_dot, 1, 0],
-                  [-2*beta_dot, -2*r_dot_over_r, 0, -one_over_r],
-                  [one_over_r*(ae*np.sin(beta) - -an*np.cos(beta)), one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)), 0, 0],
-                  [-ae*np.cos(beta)- -an*np.sin(beta), -ae*np.sin(beta)+ -an*np.cos(beta), 0, -r_dot_over_r]]).T
+    # an = u * np.cos(own_mav[2])
+    # ae = u * np.sin(own_mav[2])
+    J = np.array([[-2*r_dot_over_r, -2*beta_dot,     one_over_r*(-1*-ae*np.sin(beta) - -an*np.cos(beta)), (-ae*np.cos(beta) - -an*np.sin(beta))],
+                  [2*beta_dot,      -2*r_dot_over_r, one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)),   (-ae*np.sin(beta) + -an*np.cos(beta))],
+                  [1,               0,               0,                                                  0],
+                  [0,               -one_over_r,     0,                                                  -r_dot_over_r]])
+    # J = np.array([[-2*r_dot_over_r, 2*beta_dot, 1, 0],
+    #               [-2*beta_dot, -2*r_dot_over_r, 0, -one_over_r],
+    #               [one_over_r*(ae*np.sin(beta) - -an*np.cos(beta)), one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)), 0, 0],
+    #               [-ae*np.cos(beta)- -an*np.sin(beta), -ae*np.sin(beta)+ -an*np.cos(beta), 0, -r_dot_over_r]]).T
     return J
 
 def measurement_model(x):
     '''
-    x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
+    x: state vector x=[beta_dot, r_dot_over_r, beta, one_over_r]
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
     return np.array([beta])
 
 def jacobian_measurement_model(x):
     '''
-    x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
+    x: state vector x=[beta_dot, r_dot_over_r, beta, one_over_r]
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
     H = np.array([[0, 0, 1, 0]])
@@ -69,8 +77,8 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t):
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R.reshape(-1,1)@K.T
 
     mu = np.array(mu_bar)
-    # mu[0] = wrap(mu[0])
-    # mu[2] = wrap(mu[2])
+    mu[0] = wrap(mu[0])
+    mu[2] = wrap(mu[2])
     sigma = sigma_bar
     
     return mu, sigma 
