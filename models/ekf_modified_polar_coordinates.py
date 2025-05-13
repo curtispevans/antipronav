@@ -8,43 +8,40 @@ def f(x, own_mav, u, A=15):
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     u: control vector u=[acceleration_x, acceleration_y]
     '''
-    beta_dot, r_dot_over_r, beta, one_over_r, epsilon_A = x
+    beta_dot, r_dot_over_r, beta, one_over_r = x
     an = -own_mav[3]*u*np.sin(own_mav[2])
     ae = own_mav[3]*u*np.cos(own_mav[2])
     f_ = jnp.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ae*jnp.cos(beta) - -an*jnp.sin(beta)),
                     beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ae*jnp.sin(beta) + -an*jnp.cos(beta)),
                     beta_dot,
-                   -r_dot_over_r * one_over_r,
-                   -A*one_over_r*r_dot_over_r])
+                   -r_dot_over_r * one_over_r])
     return f_
 
 
 def jacobian_f(x, own_mav, u, A=15):
-    beta_dot, r_dot_over_r, beta, one_over_r, epsilon_A = x
+    beta_dot, r_dot_over_r, beta, one_over_r = x
     an = -own_mav[3]*u*np.sin(own_mav[2])
     ae = own_mav[3]*u*np.cos(own_mav[2])
-    J = np.array([[-2*r_dot_over_r, 2*beta_dot, 1, 0, 0],
-                  [-2*beta_dot, -2*r_dot_over_r, 0, -one_over_r, -A*one_over_r],
-                  [one_over_r*(ae*np.sin(beta) - -an*np.cos(beta)), one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)), 0, 0, 0],
-                  [-ae*np.cos(beta)- -an*np.sin(beta), -ae*np.sin(beta)+ -an*np.cos(beta), 0, -r_dot_over_r, -A*r_dot_over_r],
-                  [0, 0, 0, 0, 0]]).T
+    J = np.array([[-2*r_dot_over_r, 2*beta_dot, 1, 0],
+                  [-2*beta_dot, -2*r_dot_over_r, 0, -one_over_r],
+                  [one_over_r*(ae*np.sin(beta) - -an*np.cos(beta)), one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)), 0, 0],
+                  [-ae*np.cos(beta)- -an*np.sin(beta), -ae*np.sin(beta)+ -an*np.cos(beta), 0, -r_dot_over_r]]).T
     return J
 
 def measurement_model(x, A=15):
     '''
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
-    beta_dot, r_dot_over_r, beta, one_over_r, alpha = x
-    return jnp.array([beta, alpha, alpha - A*one_over_r])
+    beta_dot, r_dot_over_r, beta, one_over_r = x
+    return jnp.array([beta, A*one_over_r])
 
 def jacobian_measurement_model(x, A=15):
     '''
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
-    beta_dot, r_dot_over_r, beta, one_over_r, alpha = x
+    beta_dot, r_dot_over_r, beta, one_over_r = x
     H = np.array([[0, 0, 1, 0, 0],
-                  [0, 0, 0, 0, 1],
-                  [0, 0, 0, -A, 1]])
+                  [0, 0, 0, 0, ]])
     return H
 
 def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=15):
