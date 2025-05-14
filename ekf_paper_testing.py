@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.ekf_paper import kalman_update
+from models.mpekf import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
@@ -37,16 +37,13 @@ Ts = 1/30
 mu = np.array([0, 0, bearings[0], 1/true_distance[0]])
 sigma = np.diag(np.array([np.radians(0.1), 0.1, np.radians(0.1), 0.1]))**2
 
-Q = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01]))**2
+Q = np.diag(np.array([np.radians(0.1), 1, np.radians(0.1), 0.01]))**2
 # Q = jnp.eye(6)*0.1
 R = np.diag(np.array([[np.radians(0.01)]]))**2
 R_psuedo = np.diag(np.array([0.000001]))
 
 est_dist = []
 est_bearing = []
-est_pixel_size = []
-est_cn = []
-est_ce = []
 std_bearing = []
 std_pixel_size = []
 std_int_vel = []
@@ -55,13 +52,9 @@ std_inverse_distance = []
 for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_states[1:], us[1:]):
     measurement = np.array([bearing])
     mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
-    # print(sigma)
-    # print(np.linalg.norm(mu[:2]))
     est_dist.append(mu[3])
     est_bearing.append(mu[2])
-    # est_pixel_size.append(mu[4])
     std_bearing.append(np.sqrt(sigma[2, 2]))
-    # std_pixel_size.append(np.sqrt(sigma[4, 4]))
     std_inverse_distance.append(np.sqrt(sigma[3, 3]))
 
 
@@ -74,14 +67,6 @@ plt.ylabel('Bearing')
 plt.legend()
 plt.title('Bearing between Mavs')
 
-# plt.subplot(222)
-# plt.plot(pixel_sizes, label='True Pixel Size')
-# plt.plot(est_pixel_size, label='Estimated Pixel Size')
-# plt.xlabel('Time')
-# plt.ylabel('Pixel Size')
-# plt.title('Pixel Size')
-# plt.legend()
-
 
 plt.subplot(122)
 plt.plot(1/true_distance, label='True inverse distance')
@@ -91,15 +76,6 @@ plt.ylabel('Inverse Distance')
 plt.title('Inverse Distance between Mavs')
 plt.legend()
 
-
-# plt.subplot(224)
-# plt.plot(true_distance, label='True Distance')
-# plt.plot(1/np.array(est_dist), label='Estimated Distance')
-# plt.xlabel('Time')
-# plt.ylabel('Distance')
-# plt.title('Distance between Mavs')
-# plt.legend()
-
 plt.tight_layout()
 
 plt.figure(2)
@@ -108,12 +84,6 @@ plt.plot(std_bearing, label='Std Bearing')
 plt.xlabel('Time')
 plt.ylabel('Std Bearing')
 plt.title('Std Bearing')
-
-# plt.subplot(222)
-# plt.plot(std_pixel_size, label='Std Pixel Size')
-# plt.xlabel('Time')
-# plt.ylabel('Std Pixel Size')
-# plt.title('Std Pixel Size')
 
 plt.subplot(122)
 plt.plot(std_inverse_distance, label='Std Inverse Distance')

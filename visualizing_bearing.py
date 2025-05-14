@@ -20,7 +20,7 @@ own_velocities = []
 mav_state = []
 us = []
 
-for i in range(500): 
+for i in range(1000): 
     if i < 50:
         u = -0.7
     elif i < 100:
