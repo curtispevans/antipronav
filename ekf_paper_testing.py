@@ -34,7 +34,7 @@ us = np.load('data/us.npy')
 
 Ts = 1/30
 
-mu = np.array([0, 0, bearings[0], 1/true_distance[0]])
+mu = np.array([0, 10, bearings[0], 1/true_distance[0]])
 sigma = np.diag(np.array([np.radians(0.1), 0.1, np.radians(0.1), 0.1]))**2
 
 Q = np.diag(np.array([np.radians(0.1), 1, np.radians(0.1), 0.01]))**2
