@@ -10,8 +10,8 @@ def f(x, own_mav, u, Ts):
     ax = own_mav[3]*u*np.cos(own_mav[2])
     w1 = -Ts*ax
     w2 = -Ts*ay
-    w3 = -ax/2 * Ts
-    w4 = -ay/2 * Ts 
+    w3 = -ax/2 * Ts**2
+    w4 = -ay/2 * Ts**2 
     S1 = y1 + y4*(w1*np.cos(y3) - w2*np.sin(y3))
     S2 = y2 + y4*(w1*np.sin(y3) + w2*np.cos(y3))
     S3 = Ts*y1 + y4*(w3*np.cos(y3) - w4*np.sin(y3))
@@ -23,15 +23,15 @@ def f(x, own_mav, u, Ts):
     return f_
 
 def jacobian_f(fun, x, own_mav, u, Ts):
-    f = fun(x, own_mav, u, Ts)
-    m = f.shape[0]
+    fx = fun(x, own_mav, u, Ts)
+    m = fx.shape[0]
     n = x.shape[0]
     eps = 0.0001
     J = np.zeros((m, n))
     for i in range(n):
         x_eps = np.copy(x)
         x_eps[i] += eps
-        df = (fun(x_eps, own_mav, u, Ts) - f) / eps
+        df = (fun(x_eps, own_mav, u, Ts) - fx) / eps
         J[:, i] = df
     return J
 

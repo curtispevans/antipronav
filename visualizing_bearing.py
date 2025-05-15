@@ -5,7 +5,7 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-300., 0., 0, 25.], Ts)
-mav2 = MavDynamics([0., 0., 0, 15.], Ts)
+mav2 = MavDynamics([200., -200., np.pi/4, 0.], Ts)
 
 u = -0.07
 A = 15
