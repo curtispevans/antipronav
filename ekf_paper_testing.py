@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.mpekf import kalman_update
+from models.ekf_paper import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):

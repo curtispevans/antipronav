@@ -5,10 +5,10 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-300., 0., 0, 25.], Ts)
-mav2 = MavDynamics([200., -200., np.pi/4, 0.], Ts)
+mav2 = MavDynamics([200., -200., np.pi/4, 5.], Ts)
 
 u = -0.07
-A = 15
+A = 20
 
 bearings = []
 bearings_vel = []
@@ -19,32 +19,48 @@ relative_velocities = []
 own_velocities = []
 mav_state = []
 us = []
+counter = 75
 
 for i in range(1000): 
-    if i < 50:
-        u = -0.7
-    elif i < 100:
+    # if i < 50:
+    #     u = 0.0
+    # elif 50 < i < 125:
+    #     u = -0.7
+    # elif 125 < i < 200:
+    #     u = 0.0
+    # elif 200 < i < 350:
+    #     u = 0.7
+    # elif 350 < i < 500:
+    #     u = 0.0
+    # elif 500 < i < 650:
+    #     u = -0.7
+    # elif 650 < i < 800:
+    #     u = 0.0
+    # elif 800 < i < 950:
+    #     u = 0.7
+    # elif 950 < i < 1000:
+    #     u = 0.0
+    # # elif i < 900:
+    # #     u = 0.0
+    # # else:
+    # #     u = 0.7
+    # if i < 50:
+    #     u = 0.1
+    # elif 50 < i < 125:
+    #     u = -0.1
+    # elif 125 < i < 200:
+    #     u = 0.1
+    # else:
+    #     u = -0.1
+    if i < 10:
         u = 0.0
-    elif i < 200:
-        u = 0.7
-    elif i < 300:
-        u = 0.0
-    elif i < 400:
-        u = -0.7
-    elif i < 500:
-        u = 0.0
-    elif i < 600:
-        u = 0.7
-    elif i < 700:
-        u = 0.0
-    elif i < 800:
-        u = -0.7
-    elif i < 900:
-        u = 0.0
-    else:
-        u = 0.7
-    us.append(u)  
-    mav1.update(u)
+    elif i % 200 < 100:
+        u = 0.05
+    elif i % 200 > 100:
+        u = -0.06
+
+    us.append(0.0)  
+    mav1.update(0.0)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])

@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.ekf_modified_polar_coordinates_unknownA import kalman_update
+from models.mpekf_unknownA import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
@@ -35,13 +35,13 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 14
+A = 21
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 0.00001]))**2
+sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 8]))**2
 
-Q = np.diag(np.array([np.radians(1e-6), 1e-6, np.radians(0.1), 1e-4, 1e-9]))**2
-R = np.diag(np.array([np.radians(0.001), 0.001]))**2
+Q = np.diag(np.array([np.radians(0.1), 1e-6, np.radians(0.1), 1e-4, 1e-5]))**2
+R = np.diag(np.array([np.radians(0.001), 0.01]))**2
 
 est_dist = []
 est_bearing = []
@@ -98,7 +98,7 @@ plt.title('Inverse Distance between Mavs')
 plt.legend()
 
 plt.subplot(224)
-plt.plot(15*np.ones(len(est_A)), label='True A')
+plt.plot(20*np.ones(len(est_A)), label='True A')
 plt.plot(est_A, label='Estimated A')
 plt.xlabel('Time')
 plt.ylabel('Wingspan')

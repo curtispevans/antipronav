@@ -8,18 +8,17 @@ def f(x, own_vel):
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     u: control vector u=[acceleration_x, acceleration_y]
     '''
-    theta, pixel_size, c_n, c_e, eta, A = x
+    theta, c_n, c_e, eta, A = x
     los_n = jnp.cos(theta)
     los_e = jnp.sin(theta)
     v_n = c_n - own_vel[0]
     v_e = c_e - own_vel[1]
     bearing_dot_relative_velocity = los_n*v_n + los_e*v_e
     f_ = jnp.array([eta*(-los_e*v_n + los_n*v_e),
-                   -pixel_size*eta*bearing_dot_relative_velocity,
                    0,
                    0,
-                   -eta*pixel_size*bearing_dot_relative_velocity/A, 
-                   (pixel_size**2/A - pixel_size*eta)*bearing_dot_relative_velocity/eta])
+                   -eta**2*bearing_dot_relative_velocity, 
+                   0])
     return f_
 
 
@@ -30,8 +29,8 @@ def measurement_model(x):
     '''
     x: state vector x=[los_x, los_y, pixel_area, relative_velocity_x, relative_velocity_y, inverse_distance]
     '''
-    theta, pixel_size, c_n, c_e, eta, A = x
-    return jnp.array([theta, pixel_size, pixel_size - A*eta])
+    theta, c_n, c_e, eta, A = x
+    return jnp.array([theta, A*eta])
 
 def jacobian_measurement_model(x):
     '''
