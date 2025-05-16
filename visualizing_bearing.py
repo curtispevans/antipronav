@@ -4,10 +4,10 @@ from models.mav_dynamics import MavDynamics
 
 Ts = 1/30
                 # north, east, heading, speed
-mav1 = MavDynamics([-300., 0., 0, 25.], Ts)
-mav2 = MavDynamics([200., -200., np.pi/4, 5.], Ts)
+mav1 = MavDynamics([-500., 0., 0, 30.], Ts)
+mav2 = MavDynamics([0., -200., np.pi/2, 30.], Ts)
 
-u = -0.07
+u = 0.0
 A = 20
 
 bearings = []
@@ -52,15 +52,18 @@ for i in range(1000):
     #     u = 0.1
     # else:
     #     u = -0.1
-    if i < 10:
+    # if i < 10:
+    #     u = 0.0
+    # elif i % 200 < 100:
+    #     u = 0.05
+    # elif i % 200 > 100:
+    #     u = -0.06
+    if i > 250:
+        u = 0.07
+    if i > 400:
         u = 0.0
-    elif i % 200 < 100:
-        u = 0.05
-    elif i % 200 > 100:
-        u = -0.06
-
-    us.append(0.0)  
-    mav1.update(0.0)
+    us.append(u)  
+    mav1.update(u)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])
@@ -72,12 +75,14 @@ for i in range(1000):
     if relative_bearing > np.pi:
         relative_bearing -= 2*np.pi
     bearings.append(relative_bearing)
+    # bearings.append(relative_bearing + np.random.normal(0, np.radians(1)))
     if i > 0:
         bearings_vel.append((bearings[-1] - bearings[-2]) / Ts)
 
     rho = np.linalg.norm(mav2._state[0:2] - mav1._state[0:2])
     pixel_size = A / rho 
-    pixel_sizes.append(pixel_size)
+    pixel_sizes.append(pixel_size) 
+    # pixel_sizes.append(pixel_size + np.random.normal(0, 0.01))
     distances.append(rho)
 
     own_vel = mav1._state[3]*np.array([np.cos(mav1._state[2]), np.sin(mav1._state[2])])

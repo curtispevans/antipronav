@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.mpekf_unknownA import kalman_update
+from models.ekf_modified_polar_coordinates_unknownA import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
@@ -35,13 +35,13 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 21
+A = 10
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.01), 0.01, np.radians(0.01), 0.01, 8]))**2
+sigma = np.diag(np.array([np.radians(0.1), 0.01, np.radians(0.1), 0.1, 10]))**2
 
-Q = np.diag(np.array([np.radians(0.1), 1e-6, np.radians(0.1), 1e-4, 1e-5]))**2
-R = np.diag(np.array([np.radians(0.001), 0.01]))**2
+Q = np.diag(np.array([np.radians(0.1), 1e-6, np.radians(0.1), 1e-4, 0.001]))**2
+R = np.diag(np.array([np.radians(1), 0.01]))**2
 
 est_dist = []
 est_bearing = []
@@ -136,7 +136,7 @@ plt.tight_layout()
 
 plt.figure(3)
 mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, true_distance, bearings)
-plt.scatter([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], c='r', marker='o', label='Mav 1')
+plt.scatter([mav[1] for mav in mav_poses], [mav[0] for mav in mav_poses], c='r', marker='o', label='Ownship')
 plt.scatter([intruder[1] for intruder in intruder_poses], [intruder[0] for intruder in intruder_poses], c='b', marker='o', label='Intruder True')
 mav_poses, intruder_poses_est = get_all_own_poses_and_intruder_poses(mav_states[1:], 1/np.array(est_dist), est_bearing)
 plt.scatter([intruder[1] for intruder in intruder_poses_est], [intruder[0] for intruder in intruder_poses_est], c='g', marker='o', label='Intruder Est')
@@ -149,8 +149,17 @@ for i in range(0, len(intruder_poses),30):
     plt.plot([x_mav, x_true], [y_mav, y_true], 'r--', linewidth=1)
     plt.plot([x_true, x_est], [y_true, y_est], 'k--', linewidth=1)
 
+plt.legend()
 
+# save the figure as a png file
+plt.xlabel('East')
+plt.ylabel('North')
+plt.title('Mav Position')
+
+plt.grid()
 plt.tight_layout()
+plt.savefig('ekf_modified_polar_coordinates_unknownA.png', dpi=300)
+
 plt.show()
 
 
