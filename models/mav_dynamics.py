@@ -8,6 +8,8 @@ class MavDynamics:
 
     def update(self, u):
         # Integrate ODE using Runge-Kutta RK4 algorithm
+        # u = g*tan(phi)/V
+        # g*tan(phi) = u*V
         time_step = self.Ts
         k1 = self._derivatives(self._state[0:4], u)
         k2 = self._derivatives(self._state[0:4] + time_step / 2. * k1, u)
