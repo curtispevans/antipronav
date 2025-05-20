@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.mpekf_unknownA import kalman_update
+from models.ekf_modified_polar_coordinates_unknownA import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
@@ -35,13 +35,13 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 30
+A = 10
 
 mu = np.array([0, 0, bearings[0], 1./true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.1), 0.01, np.radians(0.1), 0.1, 10]))**2
+sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 0.1, 10]))**2
 
-Q = np.diag(np.array([np.radians(0.1), 1e-6, np.radians(0.1), 1e-4, 0.001]))**2
-R = np.diag(np.array([np.radians(1), 0.01]))**2
+Q = np.diag(np.array([np.radians(0.1), 1e-5, np.radians(0.1), 1e-2, 0.1]))**2
+R = np.diag(np.array([np.radians(1), 0.1]))**2
 
 est_dist = []
 est_bearing = []

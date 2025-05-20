@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from models.mav_dynamics import MavDynamics
+from scipy.interpolate import PchipInterpolator, PPoly
 
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-500., 0., 0, 30.], Ts)
-mav2 = MavDynamics([300., 0., 0, 0.], Ts)
+mav2 = MavDynamics([0., -200., 0, 10.], Ts)
 
 u = 0.0
 A = 20
@@ -19,7 +20,12 @@ relative_velocities = []
 own_velocities = []
 mav_state = []
 us = []
-counter = 75
+
+x = [0, 50, 150, 250, 300, 350, 450]
+y = [0, 0, 0.07, 0.07, 0.0, -0.07, -0.07]
+f = PchipInterpolator(x, y)
+t = np.linspace(0, 500, 500)
+bearing_rate = f(t)
 
 for i in range(1000): 
     if i < 50:
@@ -40,8 +46,8 @@ for i in range(1000):
         u = 0.3
     elif 950 < i < 1000:
         u = 0.0
-    # # elif i < 900:
-    # #     u = 0.0
+    # elif i < 900:
+    #     u = 0.0
     # # else:
     # #     u = 0.7
     # if i < 50:
@@ -58,10 +64,10 @@ for i in range(1000):
     #     u = 0.05
     # elif i % 200 > 100:
     #     u = -0.06
-    # if i > 250:
-    #     u = 0.07
-    # if i > 400:
-    #     u = 0.0
+    # if i % 500 > 250:
+    #     u = 0.01
+    # if i % 500 > 400:
+    #     u = -0.01
     us.append(u)  
     mav1.update(u)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
@@ -129,6 +135,40 @@ plt.grid()
 
 plt.tight_layout()
 plt.show()
+
+V = np.array([mav_state[i][3] for i in range(len(mav_state))])
+dV = np.diff(V)
+
+plt.subplot(221)
+plt.plot(V)
+plt.xlabel('Time')
+plt.ylabel('Velocity')
+plt.title('Velocity of Mav 1')
+plt.grid()
+
+plt.subplot(222)
+plt.plot(dV)
+plt.xlabel('Time')
+plt.ylabel('Acceleration')
+plt.title('Acceleration of Mav 1')
+plt.grid()
+
+plt.subplot(223)
+plt.plot(us)
+plt.xlabel('Time')
+plt.ylabel('Heading Rate')
+
+
+dchi = np.diff(np.array([mav[2] for mav in mav_state]))/Ts
+plt.subplot(224)
+plt.plot(dchi)
+plt.xlabel('Time')
+plt.ylabel('Bearing Rate')
+plt.title('Bearing Rate of Mav 1')
+plt.grid()
+plt.tight_layout()
+plt.show()
+
 
 np.save('data/bearing.npy', np.array(bearings))
 np.save('data/pixel_sizes.npy', np.array(pixel_sizes))
