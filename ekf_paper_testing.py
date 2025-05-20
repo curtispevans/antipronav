@@ -41,9 +41,9 @@ G = np.array([[10/300**2, 0, 1/300, 0],
               [0, -1/300, 0, 0]])
 P = np.diag([1, 1, 1, 1])**2
 # sigma = G @ P @ G.T
-sigma = np.diag(np.array([np.radians(0.1), 0.1, np.radians(0.1), 0.1]))**2
+sigma = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 1]))**2
 
-Q = np.diag(np.array([np.radians(0.1), 1e-3, np.radians(0.1), 1e-3]))**2
+Q = np.diag(np.array([np.radians(0.1), 1e-8, np.radians(0.1), 1e-4]))**2
 # Q = jnp.eye(6)*0.1
 R = np.diag(np.array([[np.radians(1)]]))**2
 R_psuedo = np.diag(np.array([0.000001]))

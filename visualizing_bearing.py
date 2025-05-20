@@ -5,7 +5,7 @@ from models.mav_dynamics import MavDynamics
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-500., 0., 0, 30.], Ts)
-mav2 = MavDynamics([0., -200., np.pi/2, 30.], Ts)
+mav2 = MavDynamics([300., 0., 0, 0.], Ts)
 
 u = 0.0
 A = 20
@@ -22,24 +22,24 @@ us = []
 counter = 75
 
 for i in range(1000): 
-    # if i < 50:
-    #     u = 0.0
-    # elif 50 < i < 125:
-    #     u = -0.7
-    # elif 125 < i < 200:
-    #     u = 0.0
-    # elif 200 < i < 350:
-    #     u = 0.7
-    # elif 350 < i < 500:
-    #     u = 0.0
-    # elif 500 < i < 650:
-    #     u = -0.7
-    # elif 650 < i < 800:
-    #     u = 0.0
-    # elif 800 < i < 950:
-    #     u = 0.7
-    # elif 950 < i < 1000:
-    #     u = 0.0
+    if i < 50:
+        u = 0.0
+    elif 50 < i < 125:
+        u = -0.3
+    elif 125 < i < 200:
+        u = 0.0
+    elif 200 < i < 350:
+        u = 0.3
+    elif 350 < i < 500:
+        u = 0.0
+    elif 500 < i < 650:
+        u = -0.3
+    elif 650 < i < 800:
+        u = 0.0
+    elif 800 < i < 950:
+        u = 0.3
+    elif 950 < i < 1000:
+        u = 0.0
     # # elif i < 900:
     # #     u = 0.0
     # # else:
@@ -58,10 +58,10 @@ for i in range(1000):
     #     u = 0.05
     # elif i % 200 > 100:
     #     u = -0.06
-    if i > 250:
-        u = 0.07
-    if i > 400:
-        u = 0.0
+    # if i > 250:
+    #     u = 0.07
+    # if i > 400:
+    #     u = 0.0
     us.append(u)  
     mav1.update(u)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))

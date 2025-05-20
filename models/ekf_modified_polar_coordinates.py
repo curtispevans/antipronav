@@ -9,10 +9,10 @@ def f(x, own_mav, u, A=15):
     u: control vector u=[acceleration_x, acceleration_y]
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
-    an = -own_mav[3]*u*np.sin(own_mav[2])
-    ae = own_mav[3]*u*np.cos(own_mav[2])
-    f_ = jnp.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ae*jnp.cos(beta) - -an*jnp.sin(beta)),
-                    beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ae*jnp.sin(beta) + -an*jnp.cos(beta)),
+    ax = 0
+    ay = own_mav[3]*u
+    f_ = jnp.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ay*jnp.cos(beta) - -ax*jnp.sin(beta)),
+                    beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ay*jnp.sin(beta) + -ax*jnp.cos(beta)),
                     beta_dot,
                    -r_dot_over_r * one_over_r])
     return f_

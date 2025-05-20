@@ -6,12 +6,12 @@ def f(x, own_mav, u):
     u: control vector u=angular_velocity
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
-    an = -own_mav[3]*u*np.sin(own_mav[2])
-    ae = own_mav[3]*u*np.cos(own_mav[2])
+    ax = 0
+    ay = own_mav[3]*u
     # an = u * np.cos(own_mav[2])
     # ae = u * np.sin(own_mav[2])
-    f_ = np.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)),
-                    beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ae*np.sin(beta) + -an*np.cos(beta)),
+    f_ = np.array([-2*beta_dot*r_dot_over_r + one_over_r*(-ay*np.cos(beta) - -ax*np.sin(beta)),
+                    beta_dot**2 - r_dot_over_r**2 + one_over_r*(-ay*np.sin(beta) + -ax*np.cos(beta)),
                     beta_dot,
                     -r_dot_over_r * one_over_r])
     return f_
@@ -19,12 +19,12 @@ def f(x, own_mav, u):
 
 def jacobian_f(x, own_mav, u):
     beta_dot, r_dot_over_r, beta, one_over_r = x
-    an = -own_mav[3]*u*np.sin(own_mav[2])
-    ae = own_mav[3]*u*np.cos(own_mav[2])
+    ax = 0
+    ay = own_mav[3]*u
     # an = u * np.cos(own_mav[2])
     # ae = u * np.sin(own_mav[2])
-    J = np.array([[-2*r_dot_over_r, -2*beta_dot,     one_over_r*(-1*-ae*np.sin(beta) - -an*np.cos(beta)), (-ae*np.cos(beta) - -an*np.sin(beta))],
-                  [2*beta_dot,      -2*r_dot_over_r, one_over_r*(-ae*np.cos(beta) - -an*np.sin(beta)),   (-ae*np.sin(beta) + -an*np.cos(beta))],
+    J = np.array([[-2*r_dot_over_r, -2*beta_dot,     one_over_r*(-1*-ay*np.sin(beta) - -ax*np.cos(beta)), (-ay*np.cos(beta) - -ax*np.sin(beta))],
+                  [2*beta_dot,      -2*r_dot_over_r, one_over_r*(-ay*np.cos(beta) - -ax*np.sin(beta)),   (-ay*np.sin(beta) + -ax*np.cos(beta))],
                   [1,               0,               0,                                                  0],
                   [0,               -one_over_r,     0,                                                  -r_dot_over_r]])
     # J = np.array([[-2*r_dot_over_r, 2*beta_dot, 1, 0],

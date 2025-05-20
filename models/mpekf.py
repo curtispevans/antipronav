@@ -6,8 +6,8 @@ def f(x, own_mav, u, Ts):
     u: control vector u=angular_velocity
     '''
     y1, y2, y3, y4 = x
-    ay = -own_mav[3]*u*np.sin(own_mav[2])
-    ax = own_mav[3]*u*np.cos(own_mav[2])
+    ax = 0
+    ay = own_mav[3]*u
     w1 = -Ts*ax
     w2 = -Ts*ay
     w3 = -ax/2 * Ts**2
