@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
-from models.ekf_modified_polar_coordinates_unknownA import kalman_update
+from models.ekf_modified_polar_coordinates_knownA import kalman_update
 from models.mav_dynamics import MavDynamics
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
@@ -33,13 +33,15 @@ mav_states = np.load('data/mav_state.npy')
 us = np.load('data/us.npy')
 
 Ts = 1/30
-A = 19
+intruder_vel = np.array([0., 0.])
+intruder_heading = np.pi/2
+A = 36
 
-mu = np.array([0, 0, bearings[0], 1/true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 0.01, .5]))**2
+mu = np.array([0, 0, bearings[0], 0.5])
+sigma = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
 
-Q = np.diag(np.array([np.radians(0.01), 1e-9, np.radians(0.01), 1e-9, 1e-9]))**2
-R = np.diag(np.array([np.radians(0.00001), 1e-9]))**2
+Q = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
+R = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
 
 est_dist = []
 est_bearing = []
@@ -56,16 +58,16 @@ est_A = []
 for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_states[1:], us[1:]):
     measurement = np.array([bearing, pixel_size])
     # measurement = np.array([bearing, pixel_size])
-    mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
+    mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A)
     # print(np.linalg.norm(mu[:2]))
     est_dist.append(mu[3])
     est_bearing.append(mu[2])
     # est_pixel_size.append(mu[4])
-    est_A.append(mu[4])
+    # est_A.append(mu[4])
     std_bearing.append(np.sqrt(sigma[2, 2]))
     # std_pixel_size.append(np.sqrt(sigma[4, 4]))
     std_inverse_distance.append(np.sqrt(sigma[3, 3])) 
-    std_A.append(np.sqrt(sigma[4, 4]))
+    # std_A.append(np.sqrt(sigma[4, 4]))
     
 
 
@@ -95,13 +97,13 @@ plt.ylabel('Inverse Distance')
 plt.title('Inverse Distance between Mavs')
 plt.legend()
 
-plt.subplot(224)
-plt.plot(20*np.ones(len(est_A)), label='True A')
-plt.plot(est_A, label='Estimated A')
-plt.xlabel('Time')
-plt.ylabel('Wingspan')
-plt.title('A')
-plt.legend()
+# plt.subplot(224)
+# plt.plot(20*np.ones(len(est_A)), label='True A')
+# plt.plot(est_A, label='Estimated A')
+# plt.xlabel('Time')
+# plt.ylabel('Wingspan')
+# plt.title('A')
+# plt.legend()
 
 plt.tight_layout()
 
@@ -124,13 +126,13 @@ plt.xlabel('Time')
 plt.ylabel('Std Inverse Distance')
 plt.title('Std Inverse Distance')
 
-plt.subplot(224)
-plt.plot(std_A, label='Std A')
-plt.xlabel('Time')
-plt.ylabel('Std A')
-plt.title('Std A')
-plt.legend()
-plt.tight_layout()
+# plt.subplot(224)
+# plt.plot(std_A, label='Std A')
+# plt.xlabel('Time')
+# plt.ylabel('Std A')
+# plt.title('Std A')
+# plt.legend()
+# plt.tight_layout()
 
 plt.figure(3)
 mav_poses, intruder_poses = get_all_own_poses_and_intruder_poses(mav_states, true_distance, bearings)
