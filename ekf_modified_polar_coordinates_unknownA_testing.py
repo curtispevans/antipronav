@@ -33,13 +33,13 @@ mav_states = np.load('data/mav_state.npy')
 us = np.load('data/us.npy')
 
 Ts = 1/30
-A = 19
+A = 16
 
 mu = np.array([0, 0, bearings[0], 1/true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 0.01, .5]))**2
+sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 0.01, 0.001]))**2
 
 Q = np.diag(np.array([np.radians(0.01), 1e-9, np.radians(0.01), 1e-9, 1e-9]))**2
-R = np.diag(np.array([np.radians(0.00001), 1e-9]))**2
+R = np.diag(np.array([np.radians(0.00001), 1e-15]))**2
 
 est_dist = []
 est_bearing = []
@@ -158,6 +158,14 @@ plt.grid()
 plt.tight_layout()
 plt.savefig('ekf_modified_polar_coordinates_unknownA.png', dpi=300)
 
+
+plt.figure(4)
+plt.plot(np.abs(1/np.array(est_dist) - true_distance[1:]), label='Range estimate error')
+plt.xlabel('Time step (1/30s)')
+plt.ylabel('Absolute Range Error (m)')
+plt.title('Range Estimate Error')
+plt.legend()
+plt.savefig('ekf_modified_polar_coordinates_unknownA_range_error.png', dpi=300)
 plt.show()
 
 
