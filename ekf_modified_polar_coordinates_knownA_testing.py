@@ -35,7 +35,7 @@ us = np.load('data/us.npy')
 Ts = 1/30
 intruder_vel = np.array([0., 0.])
 intruder_heading = np.pi/2
-A = 36
+A = 2
 
 mu = np.array([0, 0, bearings[0], 0.5])
 sigma = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2

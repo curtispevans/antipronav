@@ -6,7 +6,7 @@ from scipy.interpolate import PchipInterpolator, PPoly
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-300., 0., 0, 30.], Ts)
-mav2 = MavDynamics([0., -300., np.pi/2, 116.26], Ts)
+mav2 = MavDynamics([0., -500., np.pi/6, 50], Ts)
 
 u = 0.0
 A = 15.8
