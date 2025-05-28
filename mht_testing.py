@@ -18,8 +18,13 @@ sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
 R_inverse_distance = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
 
-
-Q_nearly_constant_accel = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-5, 1e-5]))**2
+Q_tmp = np.ones((2,2))*0.1**2
+Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
+                                    [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
+                                    [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]])
+print(Q_nearly_constant_accel)
+Q_nearly_constant_accel = np.eye(6)*0.01**2
+print(Q_nearly_constant_accel)
 R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
 intruders_dict = {}
@@ -52,7 +57,7 @@ for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_st
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.25)
+    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=100, g_force_threshold=.05)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
@@ -74,3 +79,4 @@ plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
 plt.show()
 
 print(f'Number of candidates: {len(intruders_dict)}')
+print(f"Remaining Candidates for A:\n", intruders_dict.keys())
