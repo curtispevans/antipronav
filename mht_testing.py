@@ -18,8 +18,7 @@ sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
 R_inverse_distance = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
 
-mu_nearly_constant_accel = np.array([])
-sigma_nearly_constant_accel = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01, 1e-5, 1e-5]))**2
+
 Q_nearly_constant_accel = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-5, 1e-5]))**2
 R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
