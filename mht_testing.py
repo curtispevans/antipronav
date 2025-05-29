@@ -18,7 +18,7 @@ sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
 R_inverse_distance = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
 
-Q_tmp = np.eye(2)*0.01**2
+Q_tmp = np.eye(2)*.0001**2
 Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                     [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                     [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]])
@@ -41,8 +41,8 @@ for i in range(2, 40):
     vel_x = relative_velocities[i][0] + own_velocities[i][0]
     vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
-    mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
-    sigma_nearly_constant_accel = np.eye(6)*0.1**2
+    mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
+    sigma_nearly_constant_accel = np.eye(6)*10**2
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
 
 intruder_poses = {i:[] for i in range(2, 40)}
@@ -57,7 +57,7 @@ for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_st
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=.7)
+    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=1)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
