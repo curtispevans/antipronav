@@ -18,12 +18,12 @@ sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
 R_inverse_distance = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
 
-Q_tmp = np.ones((2,2))*0.1**2
+Q_tmp = np.eye(2)*0.01**2
 Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                     [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                     [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]])
-print(Q_nearly_constant_accel)
-Q_nearly_constant_accel = np.eye(6)*0.01**2
+print(np.round(Q_nearly_constant_accel, 3))
+# Q_nearly_constant_accel = np.eye(6)*0.01**2
 print(Q_nearly_constant_accel)
 R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
@@ -57,7 +57,7 @@ for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_st
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=100, g_force_threshold=.05)
+    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=.7)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
@@ -68,9 +68,15 @@ for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_st
 
 print('Finished processing candidates.')
 
+print(f'Number of candidates: {len(intruders_dict)}')
+print(f"Remaining Candidates for A:\n", intruders_dict.keys())
+
+# print(f"intruder poses: {intruder_poses}")
+
 print('Plotting candidates...')
 # Plotting the intruder positions
 for A in intruder_poses.keys():
+    # print(intruder_poses[A])
     intruder_pos = np.array(intruder_poses[A])
     plt.plot(intruder_pos[:, 1], intruder_pos[:, 0], 'ko', label=f'Candidate {A}')
 
@@ -78,5 +84,3 @@ print('Plotting own MAV position...')
 plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
 plt.show()
 
-print(f'Number of candidates: {len(intruders_dict)}')
-print(f"Remaining Candidates for A:\n", intruders_dict.keys())
