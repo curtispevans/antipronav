@@ -46,7 +46,13 @@ for i in range(2, 40):
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
 
 intruder_poses = {i:[] for i in range(2, 40)}
-for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_states[1:], us[1:]):
+for i in range(len(bearings[1:])):
+    bearing = bearings[i+1]
+    pixel_size = pixel_sizes[i+1]
+    u = us[i+1]
+    own_mav = mav_states[i+1]
+
+
     measurement = np.array([bearing, pixel_size])
     
     
@@ -57,7 +63,8 @@ for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_st
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.7)
+    if i > 15:
+        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.01)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
