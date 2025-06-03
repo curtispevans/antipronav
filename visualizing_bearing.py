@@ -6,10 +6,10 @@ from scipy.interpolate import PchipInterpolator, PPoly
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-1000., 0., 0, 50.], Ts)
-mav2 = MavDynamics([0., -1000., np.pi/2, 50], Ts)
+mav2 = MavDynamics([0., -1000., np.pi/2, 10], Ts)
 
 u = 0.0
-A = 20
+A = 5
 
 bearings = []
 bearings_vel = []
@@ -27,7 +27,7 @@ f = PchipInterpolator(x, y)
 t = np.linspace(0, 500, 500)
 bearing_rate = f(t)
 
-for i in range(1000): 
+for i in range(500): 
     if i < 50:
         u = 0.0
     elif 50 < i < 125:
@@ -70,8 +70,8 @@ for i in range(1000):
     #     u = 0.07
     # else:
     #     u = 0.0
-    us.append(u)  
-    mav1.update(u)
+    us.append(-0.07)  
+    mav1.update(-0.07)
     mav_state.append(np.array([mav1._state[0], mav1._state[1], mav1._state[2], mav1._state[3]]))
     mav2.update(0.0)
     un = -mav1._state[3]*u*np.sin(mav1._state[2])

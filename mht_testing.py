@@ -41,7 +41,7 @@ for i in range(2, 40):
     vel_x = relative_velocities[i][0] + own_velocities[i][0]
     vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
-    mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
+    mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
 
@@ -63,8 +63,8 @@ for i in range(len(bearings[1:])):
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    if i > 15:
-        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.01)
+    if i > 20:
+        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.05)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
