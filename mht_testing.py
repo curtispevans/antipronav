@@ -64,7 +64,7 @@ for i in range(len(bearings[1:])):
 
     # Filter candidates
     if i > 20:
-        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=70, g_force_threshold=0.05)
+        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
