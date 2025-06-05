@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import halfnorm
 from models.nearly_constant_accel_kf import kalman_update as nearly_constant_accel_kf_update
 from models.ekf_modified_polar_coordinates_knownA import kalman_update as ekf_modified_polar_knownA_update
 
@@ -67,3 +68,27 @@ def filter_candidates(intruders_dict, vel_threshold=100, g_force_threshold=1):
         if velocity < vel_threshold and g_force < g_force_threshold:
             filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
     return filtered_dict
+
+def filter_candidates_probabilistic(intruders_dict, prob_threshold=0.5):
+    '''
+    Filter candidates based on a probabilistic threshold.
+    '''
+    filtered_dict = {}
+    for A in intruders_dict.keys():
+        state = intruders_dict[A][0]
+        sigma = intruders_dict[A][1]
+        intruder_state = intruders_dict[A][2]
+        intruder_sigma = intruders_dict[A][3]
+
+        # Calculate the velocity of the intruder
+        velocity = np.linalg.norm(intruder_state[2:4])
+        # Calculate the g-force
+        g_force = np.linalg.norm(intruder_state[4:]) / 9.81
+
+
+        
+    
+    return filtered_dict
+
+def get_g_force_probability(g_force):
+    pass

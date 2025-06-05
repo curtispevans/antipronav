@@ -9,7 +9,7 @@ mav1 = MavDynamics([-1000., 0., 0, 50.], Ts)
 mav2 = MavDynamics([0., -1000., np.pi/2, 100], Ts)
 
 u = 0.0
-A = 30
+A = 18
 
 bearings = []
 bearings_vel = []
