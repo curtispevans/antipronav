@@ -43,6 +43,7 @@ if __name__ == "__main__":
     df_31_40 = cleaned_df[(cleaned_df['wingspan_m'] >= 31)]
 
     beta = regression_fit(cleaned_df['wingspan_m'], cleaned_df['cruise_speed_mps'])
+    np.save('data/regression_coefficients.npy', beta)
     t = np.linspace(0, 40, 100)
     cruise_speed_fit = beta[0] * t**3 + beta[1] * t**2 + beta[2] * t + beta[3]
     plt.scatter(cleaned_df['wingspan_m'], cleaned_df['cruise_speed_mps'], alpha=0.5)

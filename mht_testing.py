@@ -63,11 +63,12 @@ for i in range(len(bearings[1:])):
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
     # Filter candidates
-    if i > 20:
-        intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
+    if i > 30:
+        # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
+        intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
     # Plot candidates
 
-    # print(np.linalg.norm(intruders_dict[2][2][4:])/9.81, np.linalg.norm(intruders_dict[2][2][2:4]))  # Print g-force of candidate 2
+    # print(np.linalg.norm(intruders_dict[18][2][4:])/9.81, np.linalg.norm(intruders_dict[18][2][2:4]))  # Print g-force of candidate 2
     
     for A in intruders_dict.keys():
         intruder_state = intruders_dict[A][2]
