@@ -13,7 +13,7 @@ us = np.load('data/us.npy')
 
 Ts = 1/30
 
-mu_inverse_distance = np.array([0, 0, bearings[0], 0.5])
+mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
 sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
 R_inverse_distance = np.diag(np.array([np.radians(0.0000001), 0.00001]))**2
@@ -31,7 +31,7 @@ intruders_dict = {}
 intruders_dict_full_state = {}
 
 Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
-R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-5, 1e-5]))**2
+R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
 
 
 for i in range(2, 40):
@@ -73,13 +73,14 @@ for i in range(len(bearings[1:])):
     # Propagate candidates for full state
     full_state_meas = np.array([bearing, pixel_size, 0, 0])
     intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, full_state_meas, Ts, Q_full_state, R_full_state)
-
+    print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict[36][2][2:4]))  # Print g-force of candidate 2
+    # print(intruders_dict_full_state[36][0][1], intruders_dict[36][0][1])
 
     # Filter candidates
     if i > 30:
         # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
         intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
-        intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, full_state_meas, R_full_state, log_prob_threshold=-1)
+        # intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, full_state_meas, R_full_state, log_prob_threshold=-1)
 
     # Plot candidates
 
@@ -87,6 +88,7 @@ for i in range(len(bearings[1:])):
     
     for A in intruders_dict.keys():
         intruder_state = intruders_dict[A][2]
+        # intruder_state = intruders_dict_full_state[A][0][4:]
         intruder_poses[A].append(intruder_state[0:2])
 
 print('Finished processing candidates.')

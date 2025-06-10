@@ -2,10 +2,14 @@ import numpy as np
 from scipy.stats import halfnorm, norm, multivariate_normal
 from models.nearly_constant_accel_kf import kalman_update as nearly_constant_accel_kf_update
 from models.ekf_modified_polar_coordinates_knownA import kalman_update as ekf_modified_polar_knownA_update
-from models.full_state_ekf import kalman_update as full_state_ekf_update
-from models.full_state_ekf import measurement_model as full_state_measurement_model
-from models.full_state_ekf import jacobian_measurement_model as full_state_jacobian_measurement_model
-from models.full_state_ekf import wrap
+# from models.full_state_ekf import kalman_update as full_state_ekf_update
+# from models.full_state_ekf import measurement_model as full_state_measurement_model
+# from models.full_state_ekf import jacobian_measurement_model as full_state_jacobian_measurement_model
+# from models.full_state_ekf import wrap
+from models.full_state_ekf_discrete import kalman_update as full_state_ekf_update
+from models.full_state_ekf_discrete import measurement_model as full_state_measurement_model
+from models.full_state_ekf_discrete import jacobian_measurement_model as full_state_jacobian_measurement_model
+from models.full_state_ekf_discrete import wrap
 
 def velocity_mean_function(wingspan):
     beta = np.load('data/regression_coefficients.npy')

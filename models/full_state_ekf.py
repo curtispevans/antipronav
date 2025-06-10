@@ -61,25 +61,32 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A):
     mu_bar = mu + Ts * f(mu, own_mav, u)
     J = jacobian_f(f, mu_bar, own_mav, u)
     Jd = np.eye(len(mu)) + Ts*J + 0.5*Ts**2*J@J
+    # sigma = Jd @ sigma @ Jd.T + Ts**2*Q
     sigma = Jd @ sigma @ Jd.T + Q
+
+    mu_bar = mu
+    sigma_bar = sigma
 
     # measurement update
     z = measurement_model(mu_bar, own_mav, A)
     H = jacobian_measurement_model(measurement_model, mu_bar, own_mav, A)
-    S = H @ sigma @ H.T + R
-    K = sigma @ H.T @ np.linalg.inv(S)
-    innovation = measurement - z
+    S = H@sigma_bar@H.T + R
+    K = sigma_bar@H.T@np.linalg.inv(S)
+    # innovation = wrap(measurement - z, dim=0)
+    innovation = np.array(measurement - z)
     innovation[0] = wrap(innovation[0])
     # innovation[2] = wrap(innovation[2])
-    mu_bar = mu + K @ innovation
+    # print(innovation)
+    mu_bar = mu_bar + K@(innovation)
+    I = np.eye(len(K))
+    sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
-    I = np.eye(len(mu))
-    sigma = (I - K @ H) @ sigma @ (I - K @ H).T + K @ R @ K.T
-
+    mu = np.array(mu_bar)
     mu[0] = wrap(mu[0])
     mu[2] = wrap(mu[2])
-
-    return mu, sigma
+    sigma = sigma_bar
+    
+    return mu, sigma 
 
 
 

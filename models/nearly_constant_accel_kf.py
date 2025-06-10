@@ -29,6 +29,6 @@ def kalman_update(mu, sigma, measurement, Q, R, Ts):
     K = sigma @ C.T @ np.linalg.inv(S)
     
     mu = mu + K @ (measurement - z)
-    sigma = (np.eye(len(mu)) - K @ C) @ sigma
+    sigma = (np.eye(len(mu)) - K @ C) @ sigma @ (np.eye(len(mu)) - K @ C).T + K @ R @ K.T
 
     return mu, sigma
