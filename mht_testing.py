@@ -28,6 +28,11 @@ Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tm
 R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
 intruders_dict = {}
+intruders_dict_full_state = {}
+
+Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
+R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-5, 1e-5]))**2
+
 
 for i in range(2, 40):
     # Get the position of the intruder
@@ -44,6 +49,9 @@ for i in range(2, 40):
     mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
+    intruders_dict_full_state[i] = [np.array([*mu_inverse_distance.copy(), *mu_nearly_constant_accel.copy()]),
+                                    np.block([[sigma_inverse_distance.copy(), np.zeros((4,6))],
+                                              [np.zeros((6,4)), sigma_nearly_constant_accel.copy()]])]
 
 intruder_poses = {i:[] for i in range(2, 40)}
 for i in range(len(bearings[1:])):
@@ -62,10 +70,17 @@ for i in range(len(bearings[1:])):
     # Propagate candidates for nearly constant acceleration
     intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
+    # Propagate candidates for full state
+    full_state_meas = np.array([bearing, pixel_size, 0, 0])
+    intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, full_state_meas, Ts, Q_full_state, R_full_state)
+
+
     # Filter candidates
     if i > 30:
         # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
         intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
+        intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, full_state_meas, R_full_state, log_prob_threshold=-1)
+
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[18][2][4:])/9.81, np.linalg.norm(intruders_dict[18][2][2:4]))  # Print g-force of candidate 2
