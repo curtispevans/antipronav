@@ -100,14 +100,14 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A):
 
     # psuedo measurement update
     R = np.diag([1e-8, 1e-8])**2  # psuedo measurement noise
-    z_psuedo = psuedo_measurement_model(mu_bar, own_mav, A)
-    H_psuedo = jacobian_measurement_model(psuedo_measurement_model, mu_bar, own_mav, A)
-    S_psuedo = H_psuedo@sigma_bar@H_psuedo.T + R
-    K_psuedo = sigma_bar@H_psuedo.T@np.linalg.inv(S_psuedo)
-    innovation_psuedo = np.array(measurement - z_psuedo)
-    mu = mu_bar + K_psuedo@(innovation_psuedo)
+    z_psuedo = psuedo_measurement_model(mu, own_mav, A)
+    H_psuedo = jacobian_measurement_model(psuedo_measurement_model, mu, own_mav, A)
+    S_psuedo = H_psuedo@sigma@H_psuedo.T + R
+    K_psuedo = sigma@H_psuedo.T@np.linalg.inv(S_psuedo)
+    innovation_psuedo = np.array(np.zeros_like(z_psuedo) - z_psuedo)
+    mu = mu + K_psuedo@(innovation_psuedo)
     I_psuedo = np.eye(len(K_psuedo))
-    sigma = (I_psuedo - K_psuedo@H_psuedo)@sigma_bar@(I_psuedo - K_psuedo@H_psuedo).T + K_psuedo@R@K_psuedo.T
+    sigma = (I_psuedo - K_psuedo@H_psuedo)@sigma@(I_psuedo - K_psuedo@H_psuedo).T + K_psuedo@R@K_psuedo.T
 
     return mu, sigma 
 

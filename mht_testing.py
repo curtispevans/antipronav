@@ -31,7 +31,8 @@ intruders_dict = {}
 intruders_dict_full_state = {}
 
 Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
-R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
+# R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
+R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5]))**2
 
 
 for i in range(2, 40):
@@ -72,7 +73,7 @@ for i in range(len(bearings[1:])):
 
     # Propagate candidates for full state
     full_state_meas = np.array([bearing, pixel_size, 0, 0])
-    intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, full_state_meas, Ts, Q_full_state, R_full_state)
+    intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, measurement, Ts, Q_full_state, R_full_state)
     print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict[36][2][2:4]))  # Print g-force of candidate 2
     # print(intruders_dict_full_state[36][0][1], intruders_dict[36][0][1])
 
@@ -87,8 +88,8 @@ for i in range(len(bearings[1:])):
     # print(np.linalg.norm(intruders_dict[18][2][4:])/9.81, np.linalg.norm(intruders_dict[18][2][2:4]))  # Print g-force of candidate 2
     
     for A in intruders_dict.keys():
-        intruder_state = intruders_dict[A][2]
-        # intruder_state = intruders_dict_full_state[A][0][4:]
+        # intruder_state = intruders_dict[A][2]
+        intruder_state = intruders_dict_full_state[A][0][4:]
         intruder_poses[A].append(intruder_state[0:2])
 
 print('Finished processing candidates.')
