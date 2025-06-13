@@ -47,7 +47,7 @@ for i in range(2, 40):
     vel_x = relative_velocities[i][0] + own_velocities[i][0]
     vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
-    mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
+    mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
     intruders_dict_full_state[i] = [np.array([*mu_inverse_distance.copy(), *mu_nearly_constant_accel.copy()]),
@@ -74,7 +74,7 @@ for i in range(len(bearings[1:])):
     # Propagate candidates for full state
     full_state_meas = np.array([bearing, pixel_size, 0, 0])
     intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, measurement, Ts, Q_full_state, R_full_state)
-    print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict[36][2][2:4]))  # Print g-force of candidate 2
+    print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict[36][2][2:4])) 
     # print(intruders_dict_full_state[36][0][1], intruders_dict[36][0][1])
 
     # Filter candidates
