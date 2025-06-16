@@ -96,7 +96,7 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A):
     sigma = sigma_bar
 
     # psuedo measurement update
-    R = np.diag([1e-8, 1e-8])**2  # psuedo measurement noise
+    R = np.diag([1e-10, 1e-10])**2  # psuedo measurement noise
     z_psuedo = psuedo_measurement_model(mu, own_mav, A)
     H_psuedo = jacobian_measurement_model(psuedo_measurement_model, mu, own_mav, A)
     S_psuedo = H_psuedo@sigma@H_psuedo.T + R
@@ -105,6 +105,11 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A):
     mu = mu + K_psuedo@(innovation_psuedo)
     I_psuedo = np.eye(len(K_psuedo))
     sigma = (I_psuedo - K_psuedo@H_psuedo)@sigma@(I_psuedo - K_psuedo@H_psuedo).T + K_psuedo@R@K_psuedo.T
+
+    mu[0] = wrap(mu[0])
+    mu[2] = wrap(mu[2])
+    # Ensure the intruder state is wrapped correctly
+    
 
     return mu, sigma 
 

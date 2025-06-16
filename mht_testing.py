@@ -30,9 +30,11 @@ R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 intruders_dict = {}
 intruders_dict_full_state = {}
 
-Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
+# Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
+Q_full_state = np.block([[Q_inverse_distance, np.zeros((4,6))],
+                         [np.zeros((6,4)), Q_nearly_constant_accel]])
 # R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
-R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5]))**2
+R_full_state = np.diag(np.array([np.radians(1e-10), 1e-10]))**2
 
 
 for i in range(2, 40):
@@ -54,6 +56,9 @@ for i in range(2, 40):
                                     np.block([[sigma_inverse_distance.copy(), np.zeros((4,6))],
                                               [np.zeros((6,4)), sigma_nearly_constant_accel.copy()]])]
 
+full_inverse_distance = []
+partial_inverse_distance = []
+
 intruder_poses = {i:[] for i in range(2, 40)}
 for i in range(len(bearings[1:])):
     bearing = bearings[i+1]
@@ -74,8 +79,11 @@ for i in range(len(bearings[1:])):
     # Propagate candidates for full state
     full_state_meas = np.array([bearing, pixel_size, 0, 0])
     intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, measurement, Ts, Q_full_state, R_full_state)
-    print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict[36][2][2:4])) 
-    # print(intruders_dict_full_state[36][0][1], intruders_dict[36][0][1])
+    # print(np.linalg.norm(intruders_dict_full_state[36][0][6:8]), np.linalg.norm(intruders_dict_full_state[36][0][8:])) 
+    # print(intruders_dict_full_state[36][0][3], intruders_dict[36][0][3])
+    full_inverse_distance.append(intruders_dict_full_state[36][0][3])
+    partial_inverse_distance.append(intruders_dict[36][0][3])
+
 
     # Filter candidates
     if i > 30:
@@ -87,7 +95,7 @@ for i in range(len(bearings[1:])):
 
     # print(np.linalg.norm(intruders_dict[18][2][4:])/9.81, np.linalg.norm(intruders_dict[18][2][2:4]))  # Print g-force of candidate 2
     
-    for A in intruders_dict.keys():
+    for A in intruders_dict_full_state.keys():
         # intruder_state = intruders_dict[A][2]
         intruder_state = intruders_dict_full_state[A][0][4:]
         intruder_poses[A].append(intruder_state[0:2])
@@ -101,6 +109,7 @@ print(f"Remaining Candidates for A:\n", intruders_dict.keys())
 
 print('Plotting candidates...')
 # Plotting the intruder positions
+plt.figure(1)
 for A in intruder_poses.keys():
     # print(intruder_poses[A])
     intruder_pos = np.array(intruder_poses[A])
@@ -108,5 +117,16 @@ for A in intruder_poses.keys():
 
 print('Plotting own MAV position...')
 plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
+
+
+plt.figure(2)
+plt.plot(full_inverse_distance, label='Full State EKF Inverse Distance')
+plt.plot(partial_inverse_distance, label='Partial Inverse Distance')
+plt.xlabel('Time Step')
+plt.ylabel('Inverse Distance (1/m)')
+plt.title('Inverse Distance Over Time')
+plt.legend()
+
 plt.show()
+
 
