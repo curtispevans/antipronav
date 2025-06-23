@@ -41,7 +41,7 @@ def jacobian_measurement_model(x, A=15):
     '''
     beta_dot, r_dot_over_r, beta, one_over_r = x
     H = np.array([[0, 0, 1, 0, 0],
-                  [0, 0, 0, 0, ]])
+                  [0, 0, 0, 0, A]])
     return H
 
 def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=15):

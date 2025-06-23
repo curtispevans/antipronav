@@ -1,4 +1,4 @@
-import models.mht_A as mht
+import models.mht_full as mht
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,7 +27,13 @@ Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tm
 # print(Q_nearly_constant_accel)
 R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
-intruders_dict = {}
+intruders_dict_full_state = {}
+
+# Q_full_state = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3]))**2
+Q_full_state = np.block([[Q_inverse_distance, np.zeros((4,6))],
+                         [np.zeros((6,4)), Q_nearly_constant_accel]])
+# R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
+R_full_state = np.diag(np.array([np.radians(1e-10), 1e-10]))**2
 
 
 for i in range(2, 40):
@@ -44,7 +50,9 @@ for i in range(2, 40):
 
     mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
-    intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
+    intruders_dict_full_state[i] = [np.array([*mu_inverse_distance.copy(), *mu_nearly_constant_accel.copy()]),
+                                    np.block([[sigma_inverse_distance.copy(), np.zeros((4,6))],
+                                              [np.zeros((6,4)), sigma_nearly_constant_accel.copy()]])]
 
 full_inverse_distance = []
 partial_inverse_distance = []
@@ -58,34 +66,28 @@ for i in range(len(bearings[1:])):
 
 
     measurement = np.array([bearing, pixel_size])
-    
-    
-    # Propagate candidates for inverse distance
-    intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
-   
-    # Propagate candidates for nearly constant acceleration
-    intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
+
+    # Propagate candidates for full state
+    intruders_dict_full_state = mht.propagate_full_state(intruders_dict_full_state, own_mav, u, measurement, Ts, Q_full_state, R_full_state)
 
 
     # Filter candidates
     if i > 30:
-        # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
-        # intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
-        intruders_dict = mht.filter_state_measurement_probabilistic(intruders_dict, measurement, R_inverse_distance, mahalanobis_dist=np.inf)
+        intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, measurement, R_inverse_distance, m_dist_thres=np.inf)
 
     # Plot candidates
 
     # print(np.linalg.norm(intruders_dict[18][2][4:])/9.81, np.linalg.norm(intruders_dict[18][2][2:4]))  # Print g-force of candidate 2
     
-    for A in intruders_dict.keys():
+    for A in intruders_dict_full_state.keys():
         # intruder_state = intruders_dict[A][2]
-        intruder_state = intruders_dict[A][2][:2]
+        intruder_state = intruders_dict_full_state[A][0][4:]
         intruder_poses[A].append(intruder_state[0:2])
 
 print('Finished processing candidates.')
 
-print(f'Number of candidates: {len(intruders_dict)}')
-print(f"Remaining Candidates for A:\n", intruders_dict.keys())
+print(f'Number of candidates: {len(intruders_dict_full_state)}')
+print(f"Remaining Candidates for A:\n", intruders_dict_full_state.keys())
 
 # print(f"intruder poses: {intruder_poses}")
 

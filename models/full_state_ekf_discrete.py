@@ -91,8 +91,8 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts, A):
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
     mu = np.array(mu_bar)
-    mu[0] = wrap(mu[0])
-    mu[2] = wrap(mu[2])
+    # mu[0] = wrap(mu[0])
+    # mu[2] = wrap(mu[2])
     sigma = sigma_bar
 
     # psuedo measurement update

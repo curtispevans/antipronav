@@ -2,14 +2,8 @@ import numpy as np
 from scipy.stats import halfnorm, norm, multivariate_normal
 from models.nearly_constant_accel_kf import kalman_update as nearly_constant_accel_kf_update
 from models.ekf_modified_polar_coordinates_knownA import kalman_update as ekf_modified_polar_knownA_update
-# from models.full_state_ekf import kalman_update as full_state_ekf_update
-# from models.full_state_ekf import measurement_model as full_state_measurement_model
-# from models.full_state_ekf import jacobian_measurement_model as full_state_jacobian_measurement_model
-# from models.full_state_ekf import wrap
-from models.full_state_ekf_discrete import kalman_update as full_state_ekf_update
-from models.full_state_ekf_discrete import measurement_model as full_state_measurement_model
-from models.full_state_ekf_discrete import jacobian_measurement_model as full_state_jacobian_measurement_model
-from models.full_state_ekf_discrete import wrap
+from models.ekf_modified_polar_coordinates_knownA import measurement_model as ekf_modified_polar_measurement_model
+from models.ekf_modified_polar_coordinates_knownA import wrap
 
 def velocity_mean_function(wingspan):
     beta = np.load('data/regression_coefficients.npy')
@@ -62,24 +56,6 @@ def propagate_candidates_inverse_distance(intruders_dict, mav, u, measurement, T
 
         intruders_dict[A][0] = state
         intruders_dict[A][1] = sigma
-
-    return intruders_dict
-
-def propagate_full_state(intruders_dict, mav, u, measurement, Ts, Q, R):
-    '''
-    intruders_dict: {A : [full_state_A, full_sigma_A]}
-    '''
-    for A in intruders_dict.keys():
-        state = intruders_dict[A][0]
-        sigma = intruders_dict[A][1]
-
-        # Update the state using the EKF
-        state, sigma = full_state_ekf_update(state, sigma, mav, u, measurement, Q , R, Ts, A)
-
-        intruders_dict[A][0] = state
-        intruders_dict[A][1] = sigma
-
-        # print(A, np.linalg.norm(state[6:8]), np.linalg.norm(state[8:])/9.81)
 
     return intruders_dict
 
@@ -138,41 +114,67 @@ def filter_candidates_probabilistic(intruders_dict, prob_threshold=0.5):
             filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
     return filtered_dict
 
-def filter_full_state_probabilistic(intruders_dict, own_mav, measurement, R_full, log_prob_threshold=0):
+
+def filter_state_measurement_probabilistic(intruders_dict, measurement, R, mahalanobis_dist = 1e-5):
     '''
-    Filter candidates based on p(measurement | state) > prob_threshold.
+    Filter candidstes based on p(measurement | state) > prob_threshold, NOT FULL STATE
     '''
+
     filtered_dict = {}
     for A in intruders_dict.keys():
         state = intruders_dict[A][0]
         sigma = intruders_dict[A][1]
-
+        intruder_state = intruders_dict[A][2]
+        intruder_sigma = intruders_dict[A][3]
         # Calculate the probability of the measurement given the state
-        log_prob = get_measurement_log_probability(state, own_mav, sigma, measurement, R_full, A)
-        print(A, log_prob, np.linalg.norm(state[6:8]))
+        log_prob = get_measurement_log_probability_not_full_state(state, sigma, measurement, R, A)
+        D2 = get_mahalanobis_distance(state, sigma, measurement, R, A)
+        print(A, log_prob, D2)
 
-        if log_prob > log_prob_threshold:
-            filtered_dict[A] = [state, sigma]
+        if D2 < mahalanobis_dist:
+            filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
+
+    return filtered_dict
 
 
 def get_g_force_probability(g_force):
     # Assuming g-force follows a half-normal distribution
     return halfnorm.logpdf(g_force, scale=0.1**0.5)  # scale can be adjusted based on expected g-force values
 
-def get_measurement_log_probability(state, own_mav, sigma, measurement, R_full, A):
+
+def get_measurement_log_probability_not_full_state(state, sigma, measurement, R, A):
     '''
     Calculate the probability of the measurement given the state using 
     the kalman filter measurement model.
     '''
-    hx = full_state_measurement_model(state, own_mav, A)
+    hx = ekf_modified_polar_measurement_model(state, A)
     innovation_mean = measurement - hx
     innovation_mean[0] = wrap(innovation_mean[0]) 
 
-    H = full_state_jacobian_measurement_model(full_state_measurement_model, state, own_mav, A)
-    S = H @ sigma @ H.T + R_full
+    H = np.array([[0, 0, 1, 0],
+                  [0, 0, 0, A]])
+    S = H @ sigma @ H.T + R
 
     log_prob = multivariate_normal.logpdf(measurement, mean=hx, cov=S)
 
     return log_prob
+
+def get_mahalanobis_distance(state, sigma, measurement, R, A):
+    '''
+    Calculate the probability of the measurement given the state using 
+    the kalman filter measurement model.
+    '''
+    hx = ekf_modified_polar_measurement_model(state, A)
+    innovation_mean = measurement - hx
+    innovation_mean[0] = wrap(innovation_mean[0]) 
+
+    H = np.array([[0, 0, 1, 0],
+                  [0, 0, 0, A]])
+    S = H @ sigma @ H.T + R
+
+    D2 = innovation_mean.T @ np.linalg.inv(S) @ innovation_mean
+
+    return D2
+
 
 
