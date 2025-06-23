@@ -73,7 +73,7 @@ for i in range(len(bearings[1:])):
 
     # Filter candidates
     if i > 30:
-        intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, measurement, R_inverse_distance, m_dist_thres=np.inf)
+        intruders_dict_full_state = mht.filter_full_state_probabilistic(intruders_dict_full_state, own_mav, measurement, R_inverse_distance, m_dist_thres=1e-4)
 
     # Plot candidates
 
