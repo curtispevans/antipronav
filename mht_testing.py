@@ -71,7 +71,7 @@ for i in range(len(bearings[1:])):
     if i > 30:
         # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
         # intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
-        intruders_dict = mht.filter_state_measurement_probabilistic(intruders_dict, measurement, R_inverse_distance, mahalanobis_dist=np.inf)
+        intruders_dict = mht.filter_state_measurement_probabilistic(intruders_dict, measurement, R_inverse_distance, mahalanobis_dist=3)
 
     # Plot candidates
 
