@@ -12,11 +12,13 @@ mav_states = np.load('data/mav_state.npy')
 us = np.load('data/us.npy')
 
 Ts = 1/30
+min_A = 5
+max_A = 15
 
 mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
 sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
 Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
-R_inverse_distance = np.diag(np.array([np.radians(0.001), 0.001]))**2
+R_inverse_distance = np.diag(np.array([np.radians(0.0001), 0.0001]))**2
 
 Q_tmp = np.eye(2)*0.01**2
 Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
@@ -30,7 +32,9 @@ R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 intruders_dict = {}
 
 
-for i in range(2, 40):
+
+
+for i in range(min_A, max_A):
     # Get the position of the intruder
     distance = i/pixel_sizes[0]  # distance in meters
     bearing = bearings[i]
@@ -49,7 +53,8 @@ for i in range(2, 40):
 full_inverse_distance = []
 partial_inverse_distance = []
 
-intruder_poses = {i:[] for i in range(2, 40)}
+intruder_poses = {i:[] for i in range(min_A, max_A)}
+inv_distances = {i:[] for i in range(min_A, max_A)}
 for i in range(len(bearings[1:])):
     bearing = bearings[i+1]
     pixel_size = pixel_sizes[i+1]
@@ -58,20 +63,22 @@ for i in range(len(bearings[1:])):
 
 
     measurement = np.array([bearing, pixel_size])
-    
-    
-    # Propagate candidates for inverse distance
-    intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
-   
-    # Propagate candidates for nearly constant acceleration
-    intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
-
 
     # Filter candidates
     if i > 30:
         # intruders_dict = mht.filter_candidates(intruders_dict, vel_threshold=150, g_force_threshold=0.01)
         # intruders_dict = mht.filter_candidates_probabilistic(intruders_dict, prob_threshold=-3)
-        intruders_dict = mht.filter_state_measurement_probabilistic(intruders_dict, measurement, R_inverse_distance, mahalanobis_dist=3)
+        intruders_dict = mht.filter_state_measurement_probabilistic(intruders_dict, measurement, R_inverse_distance, mahalanobis_dist=np.inf)
+    
+    
+    # Propagate candidates for inverse distance
+    intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
+    
+    # Propagate candidates for nearly constant acceleration
+    intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
+
+
+    
 
     # Plot candidates
 
@@ -81,6 +88,7 @@ for i in range(len(bearings[1:])):
         # intruder_state = intruders_dict[A][2]
         intruder_state = intruders_dict[A][2][:2]
         intruder_poses[A].append(intruder_state[0:2])
+        inv_distances[A].append(intruders_dict[A][0][3])
 
 print('Finished processing candidates.')
 
@@ -102,12 +110,39 @@ plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
 
 
 plt.figure(2)
-plt.plot(full_inverse_distance, label='Full State EKF Inverse Distance')
-plt.plot(partial_inverse_distance, label='Partial Inverse Distance')
+for A in inv_distances.keys():
+    plt.plot(np.abs(pixel_sizes[1:] - A*np.array(inv_distances[A])), label=f'Candidate {A}')
+# plt.plot(1/true_distance, label='True Inverse Distance', linestyle='--')
 plt.xlabel('Time Step')
-plt.ylabel('Inverse Distance (1/m)')
-plt.title('Inverse Distance Over Time')
+plt.ylabel('True Pixel Size - Estimated Pixel Size')
+
 plt.legend()
+plt.tight_layout()
+
+plt.figure(3)
+for A in inv_distances.keys():
+    plt.plot(inv_distances[A], label=f'Candidate {A}')
+plt.plot(1/true_distance, label='True Inverse Distance', linestyle='--')
+plt.xlabel('Time Step')
+plt.ylabel('Inverse Distance (m)')
+plt.legend()
+plt.tight_layout()
+
+plt.figure(4)
+for A in inv_distances.keys():
+    plt.plot(A*np.array(inv_distances[A]), label=f'Candidate {A}')
+plt.plot(pixel_sizes[1:], label='True Pixel Size', linestyle='--')
+plt.plot(10/true_distance[1:], label='True Pixel Size (10m)', linestyle='--')
+plt.title('Estimated Pixel Size vs True Pixel Size')
+plt.xlabel('Time Step')
+plt.ylabel('Estimated Pixel Size (m)')
+plt.legend()
+plt.tight_layout()
+
+plt.figure(5)
+plt.plot(pixel_sizes)
+plt.plot(10/true_distance)
+
 
 plt.show()
 

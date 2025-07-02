@@ -35,6 +35,7 @@ Q_full_state = np.block([[Q_inverse_distance, np.zeros((4,6))],
 # R_full_state = np.diag(np.array([np.radians(1e-5), 1e-5, 1e-10, 1e-10]))**2
 R_full_state = np.diag(np.array([np.radians(1e-10), 1e-10]))**2
 
+vels = []
 
 for i in range(2, 40):
     # Get the position of the intruder
@@ -48,7 +49,7 @@ for i in range(2, 40):
     vel_x = relative_velocities[i][0] + own_velocities[i][0]
     vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
-    mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
+    mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
     intruders_dict_full_state[i] = [np.array([*mu_inverse_distance.copy(), *mu_nearly_constant_accel.copy()]),
                                     np.block([[sigma_inverse_distance.copy(), np.zeros((4,6))],
@@ -83,6 +84,8 @@ for i in range(len(bearings[1:])):
         # intruder_state = intruders_dict[A][2]
         intruder_state = intruders_dict_full_state[A][0][4:]
         intruder_poses[A].append(intruder_state[0:2])
+    
+    vels.append(np.linalg.norm(intruders_dict_full_state[9][0][6:8]))
 
 print('Finished processing candidates.')
 
@@ -104,12 +107,10 @@ plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
 
 
 plt.figure(2)
-plt.plot(full_inverse_distance, label='Full State EKF Inverse Distance')
-plt.plot(partial_inverse_distance, label='Partial Inverse Distance')
-plt.xlabel('Time Step')
-plt.ylabel('Inverse Distance (1/m)')
-plt.title('Inverse Distance Over Time')
-plt.legend()
+plt.plot(vels, label='Velocity of Intruder 9')
+plt.xlabel('Time')
+plt.ylabel('Velocity (m/s)')
+plt.title('Velocity of Intruder 9')
 
 plt.show()
 

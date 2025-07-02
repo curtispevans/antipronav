@@ -129,7 +129,8 @@ def filter_state_measurement_probabilistic(intruders_dict, measurement, R, mahal
         # Calculate the probability of the measurement given the state
         log_prob = get_measurement_log_probability_not_full_state(state, sigma, measurement, R, A)
         D2 = get_mahalanobis_distance(state, sigma, measurement, R, A)
-        print(A, log_prob, D2)
+        pixel_mh = get_mahalanobis_distance_pixel_size(state, sigma, measurement, R, A)
+        print(A) #, D2, sigma[-1,-1], pixel_mh)
 
         if D2 < mahalanobis_dist:
             filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
@@ -167,6 +168,7 @@ def get_mahalanobis_distance(state, sigma, measurement, R, A):
     hx = ekf_modified_polar_measurement_model(state, A)
     innovation_mean = measurement - hx
     innovation_mean[0] = wrap(innovation_mean[0]) 
+    # print(innovation_mean)
 
     H = np.array([[0, 0, 1, 0],
                   [0, 0, 0, A]])
@@ -174,7 +176,24 @@ def get_mahalanobis_distance(state, sigma, measurement, R, A):
 
     D2 = innovation_mean.T @ np.linalg.inv(S) @ innovation_mean
 
+    return D2 + np.log(np.linalg.det(S))  # Add log determinant for numerical stability
+
+def get_mahalanobis_distance_pixel_size(state, sigma, measurement, R, A):
+    '''
+    Calculate the probability of the measurement given the state using 
+    the kalman filter measurement model.
+    '''
+    hx = ekf_modified_polar_measurement_model(state, A)
+    innovation_mean = (measurement[1] - hx[1]).reshape(1,1)
+
+    H = np.array([[0, 0, 0, A]])
+    S = H @ sigma @ H.T + R[-1,-1]
+
+    D2 = innovation_mean.T @ np.linalg.inv(S) @ innovation_mean
+
     return D2
+
+
 
 
 
