@@ -130,12 +130,37 @@ def filter_state_measurement_probabilistic(intruders_dict, measurement, R, mahal
         log_prob = get_measurement_log_probability_not_full_state(state, sigma, measurement, R, A)
         D2 = get_mahalanobis_distance(state, sigma, measurement, R, A)
         pixel_mh = get_mahalanobis_distance_pixel_size(state, sigma, measurement, R, A)
-        print(A) #, D2, sigma[-1,-1], pixel_mh)
+        # print(A) #, D2, sigma[-1,-1], pixel_mh)
 
         if D2 < mahalanobis_dist:
             filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
 
     return filtered_dict
+
+def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_dist=1):
+    filtered_dict = {}
+    mah_dists = []
+    for A in intruders_dict.keys():
+        state = intruders_dict[A][0]
+        sigma = intruders_dict[A][1]
+        intruder_state = intruders_dict[A][2]
+        intruder_sigma = intruders_dict[A][3]
+
+        measurement_pos = get_position_of_intruder(state, mav)
+
+        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R)
+        mah_dists.append(D2)
+        # print(A, D2)
+
+        # if D2 < mahalanobis_dist:
+        #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
+
+    sorted_As = np.argsort(np.array(mah_dists))
+    # print(type(intruders_dict.keys()))
+    lowest_As = np.array(list(intruders_dict.keys()))[sorted_As][:3]
+    print(lowest_As)
+    return intruders_dict
+        
 
 
 def get_g_force_probability(g_force):
@@ -193,6 +218,16 @@ def get_mahalanobis_distance_pixel_size(state, sigma, measurement, R, A):
 
     return D2
 
+def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R):
+    C = np.array([[1, 0, 0, 0, 0, 0],
+                  [0, 1, 0, 0, 0, 0]])
+    hx = C @ state
+    innovation = measurement - hx
+    
+    S = C @ sigma @ C.T + R
+    # print(innovation, '\n', S)
+    D2 = innovation.T @ np.linalg.inv(S) @ innovation
+    return D2
 
 
 
