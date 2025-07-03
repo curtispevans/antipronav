@@ -72,6 +72,7 @@ def filter_full_state_probabilistic(intruders_dict, own_mav, measurement, R_full
     Filter candidates based on p(measurement | state) > prob_threshold.
     '''
     filtered_dict = {}
+    mh_distances = []
     for A in intruders_dict.keys():
         state = intruders_dict[A][0]
         sigma = intruders_dict[A][1]
@@ -79,12 +80,15 @@ def filter_full_state_probabilistic(intruders_dict, own_mav, measurement, R_full
         # Calculate the probability of the measurement given the state
         log_prob = get_measurement_log_probability(state, own_mav, sigma, measurement, R_full, A)
         m_dist = get_mahalanobis_distance(state, sigma, own_mav, measurement, R_full, A)
-        print(A, log_prob, np.linalg.norm(state[6:8]), m_dist)
+        # print(A, log_prob, np.linalg.norm(state[6:8]), m_dist)
+        mh_distances.append(m_dist)
+        # if m_dist < m_dist_thres:
+        #     filtered_dict[A] = [state, sigma]
 
-        if m_dist < m_dist_thres:
-            filtered_dict[A] = [state, sigma]
-
-    return filtered_dict
+    sorted_As = np.argsort(np.array(mh_distances))
+    lowest_As = np.array(list(intruders_dict.keys()))[sorted_As][:5]
+    print(lowest_As)
+    return intruders_dict
 
 
 def get_g_force_probability(g_force):
