@@ -56,7 +56,7 @@ partial_inverse_distance = []
 
 intruder_poses = {i:[] for i in range(min_A, max_A)}
 inv_distances = {i:[] for i in range(min_A, max_A)}
-for i in range(len(bearings)-1):
+for i in range(100):
     bearing = bearings[i+1]
     pixel_size = pixel_sizes[i+1]
     u = us[i+1]
