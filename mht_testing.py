@@ -48,7 +48,8 @@ for i in range(min_A, max_A):
 
     mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
-    intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy()]
+    filter_counter = 0
+    intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy(), filter_counter]
 
 full_inverse_distance = []
 partial_inverse_distance = []
@@ -97,6 +98,8 @@ print('Finished processing candidates.')
 
 print(f'Number of candidates: {len(intruders_dict)}')
 print(f"Remaining Candidates for A:\n", intruders_dict.keys())
+for A in intruders_dict.keys():
+    print(A, intruders_dict[A][4])
 
 # print(f"intruder poses: {intruder_poses}")
 
@@ -145,5 +148,6 @@ plt.tight_layout()
 
 
 plt.show()
+
 
 

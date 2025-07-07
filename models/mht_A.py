@@ -157,10 +157,13 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
     sorted_As = np.argsort(np.array(mah_dists))
     # print(type(intruders_dict.keys()))
-    lowest_As = np.array(list(intruders_dict.keys()))[sorted_As][-3:]
-    if 17 in lowest_As:
-        pass
-    print(lowest_As)
+    lowest_As = np.array(list(intruders_dict.keys()))[sorted_As]
+
+    for A in lowest_As[-10:]:
+        intruders_dict[A][4] += 1
+    print(lowest_As[-3:])
+    # if 17 == lowest_As[-1]:
+    #     print('17 is highest dist')
     return intruders_dict
         
 
