@@ -6,10 +6,10 @@ from scipy.interpolate import PchipInterpolator, PPoly
 Ts = 1/30
                 # north, east, heading, speed
 mav1 = MavDynamics([-1000., 0., 0, 50.], Ts)
-mav2 = MavDynamics([0., -1000., np.pi/2, 150], Ts)
+mav2 = MavDynamics([0., -1000., np.pi/2, 237], Ts)
 
 u = 0.0
-A = 17
+A = 38
 
 bearings = []
 bearings_vel = []
@@ -104,8 +104,7 @@ for i in range(500):
     plt.plot(mav2._state[1], mav2._state[0], 'bo')
     plt.title(f'Bearing between Mavs {np.rad2deg(relative_bearing)}')
     plt.pause(0.01)
-    if i > 200:
-        print('over 200')
+    
 
 plt.xlabel('East')
 plt.ylabel('North')

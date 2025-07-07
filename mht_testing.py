@@ -13,7 +13,7 @@ us = np.load('data/us.npy')
 
 Ts = 1/30
 min_A = 2
-max_A = 20
+max_A = 40
 
 mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
 sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
@@ -56,7 +56,7 @@ partial_inverse_distance = []
 
 intruder_poses = {i:[] for i in range(min_A, max_A)}
 inv_distances = {i:[] for i in range(min_A, max_A)}
-for i in range(len(bearings[1:])):
+for i in range(len(bearings)-1):
     bearing = bearings[i+1]
     pixel_size = pixel_sizes[i+1]
     u = us[i+1]
