@@ -37,6 +37,9 @@ def regression_fit(x, y):
 if __name__ == "__main__":
     df = pd.read_csv('aircraft_data.csv')  # Replace with your actual file path
     cleaned_df = clean_aircraft_data(df)
+    
+    np.save('data/wingspan_cruise_speed.npy', cleaned_df[['wingspan_m', 'cruise_speed_mps']].values)
+    
     df_8_14 = cleaned_df[(cleaned_df['wingspan_m'] >= 8) & (cleaned_df['wingspan_m'] <= 14)]
     df_15_20 = cleaned_df[(cleaned_df['wingspan_m'] >= 15) & (cleaned_df['wingspan_m'] <= 20)]
     df_21_30 = cleaned_df[(cleaned_df['wingspan_m'] >= 21) & (cleaned_df['wingspan_m'] <= 30)]
