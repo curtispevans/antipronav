@@ -25,9 +25,9 @@ def get_random_intruder(ownship : MavDynamics) -> MavDynamics:
 wingspan_cruise_speed = np.load('data/wingspan_cruise_speed.npy')
 
 Ts = 1/30
-plot_scenarios = True  # Set to False to disable plotting
+plot_scenarios = False  # Set to False to disable plotting
 
-num_scenarios = 5
+num_scenarios = 10
 num_frames = 300
 x_min, x_max = -1000, 1000
 y_min, y_max = -1000, 1000
