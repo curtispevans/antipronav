@@ -46,7 +46,7 @@ for i in range(min_A, max_A):
     vel_x = relative_velocities[i][0] + own_velocities[i][0]
     vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
-    mu_nearly_constant_accel = np.array([int_x, int_y, vel_x, vel_y, 0, 0])
+    mu_nearly_constant_accel = np.array([int_x, int_y, 0*vel_x, 0*vel_y, 0, 0])
     sigma_nearly_constant_accel = np.eye(6)*1**2
     filter_counter = 0
     intruders_dict[i] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy(), filter_counter]
