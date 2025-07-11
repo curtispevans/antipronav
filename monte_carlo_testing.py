@@ -15,6 +15,9 @@ max_A = 40
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
+last_pose_errors = []
+last_pose_errors_adj = []
+
 for i in tqdm(range(num_scenarios)):
     bearings = all_bearings[i]
     mav_states = all_mav_states[i]
@@ -108,22 +111,31 @@ for i in tqdm(range(num_scenarios)):
 
     # print('Plotting candidates...')
     # # Plotting the intruder positions
+    true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
+    true_poses = np.array(true_poses)
+
+    last_pose_errors.append(np.linalg.norm(true_poses[-1] - est_intruder_poses[-1]))
+    last_pose_errors_adj.append(last_pose_errors[-1] / true_distance[-1])
+
     if plotting:
-        plt.figure(1)
-        plt.plot(np.array(est_intruder_poses)[:, 1], np.array(est_intruder_poses)[:, 0], 'ro', label='Estimated Intruder Position')
-        true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
-        true_poses = np.array(true_poses)
+        plt.figure(i+1)
+        
         r = intruder_vel * 10
         t = np.linspace(0, 2 * np.pi, 100)
         plt.plot(r*np.cos(t), r*np.sin(t), 'k--', alpha=0.5)
-        plt.plot(true_poses[:, 1], true_poses[:, 0], 'bo', label='True Intruder Position')
+        plt.plot(true_poses[:, 1], true_poses[:, 0], 'b--', label='True Intruder Position')
+        plt.annotate('', xy=(true_poses[-1,1], true_poses[-1,0]), xytext=(true_poses[0,1], true_poses[0,0]),
+                     arrowprops=dict(arrowstyle='->', color='blue', lw=1.5))
+        mav_states = np.array(mav_states)
+        plt.plot(mav_states[:, 1], mav_states[:, 0], 'go', label='Ownship Position', markersize=5)
+        plt.plot(np.array(est_intruder_poses)[:, 1], np.array(est_intruder_poses)[:, 0], 'ro', label='Estimated Intruder Position', markersize=5)
         plt.xlabel('X Position (m)')
         plt.ylabel('Y Position (m)')
         plt.title('Estimated vs True Intruder Position')
         plt.axis('equal')
         plt.legend()
         plt.tight_layout()
-        plt.show()
+        # plt.show()
 
     # print('Plotting own MAV position...')
     # plt.plot(mav_states[:, 1], mav_states[:, 0], 'ro', label='Own Mav')
@@ -163,10 +175,25 @@ for i in tqdm(range(num_scenarios)):
 
     # plt.show()
 
-plt.figure(1)
-plt.plot(np.abs(np.array(true_As_vels)[:,0] - np.array(predicted_As)))
+plt.figure(len(all_bearings) + 1)
+plt.subplot(311)
+plt.bar(np.arange(num_scenarios), np.abs(np.array(true_As_vels)[:,0] - np.array(predicted_As)))
 plt.xlabel('Simulation Iteration')
 plt.ylabel('Error of true A')
-plt.title("Error Plot")
+plt.title("Error of true A Plot")
+plt.tight_layout()
+
+plt.subplot(312)
+plt.bar(np.arange(num_scenarios), last_pose_errors)
+plt.xlabel('Simulation Iteration')
+plt.ylabel('Last Pose Error (m)')
+plt.title("Last Pose Error Plot")
+plt.tight_layout()
+
+plt.subplot(313)
+plt.bar(np.arange(num_scenarios), last_pose_errors_adj)
+plt.title("Last Pose Error Adjusted Plot")
+plt.xlabel('Simulation Iteration')
+plt.ylabel('Last Pose Error Adjusted (m/m)')
 plt.tight_layout()
 plt.show()
