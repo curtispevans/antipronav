@@ -156,17 +156,21 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
 
     sorted_As = np.argsort(np.array(mah_dists))
-    # print(type(intruders_dict.keys()))
     lowest_As = np.array(list(intruders_dict.keys()))[sorted_As]
 
     for A in lowest_As[:1]:
         intruders_dict[A][4] += 1
-    # print(lowest_As[-3:])
-    # if 17 == lowest_As[-1]:
-    #     print('17 is highest dist')
+
     return intruders_dict
         
-
+def get_best_estimated_intruder_pose(intruders_dict, A):
+    highest = -1
+    best_state = None
+    for A in intruders_dict.keys():
+        if intruders_dict[A][4] > highest:
+            highest = intruders_dict[A][4]
+            best_state = intruders_dict[A][2][:2]
+    return best_state
 
 def get_g_force_probability(g_force):
     # Assuming g-force follows a half-normal distribution
