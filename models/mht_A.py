@@ -163,7 +163,7 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
     return intruders_dict
         
-def get_best_estimated_intruder_pose(intruders_dict, A):
+def get_best_estimated_intruder_pose(intruders_dict):
     highest = -1
     best_state = None
     for A in intruders_dict.keys():

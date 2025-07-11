@@ -44,7 +44,7 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
     all_distances = []
     all_us = []
     all_mav_states = []
-    true_As = []
+    true_As_vels = []
     ownship_velocities = []
 
     for i in range(num_scenarios):
@@ -65,8 +65,8 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
         current_scenario_distances = []
         current_scenario_us = []
         current_scenario_mav_states = []
-        
-        true_As.append(A)
+
+        true_As_vels.append([A, intruder_velocity])
         # mav2._state[3] = intruder_velocity  # Set the intruder's velocity based on wingspan
         for j in range(num_frames):
             current_scenario_us.append(u)
@@ -109,9 +109,9 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
     np.save('data/all_distances.npy', all_distances)
     np.save('data/all_us.npy', all_us)
     np.save('data/all_mav_states.npy', all_mav_states)
-    np.save('data/true_As', true_As)
+    np.save('data/true_As_vels.npy', true_As_vels)
 
-    return all_bearings, all_pixel_sizes, all_distances, all_us, all_mav_states, true_As, ownship_velocities
+    return all_bearings, all_pixel_sizes, all_distances, all_us, all_mav_states, true_As_vels, ownship_velocities
 
 
 
