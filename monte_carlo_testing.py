@@ -5,8 +5,8 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 100
-num_frames = 300
+num_scenarios = 50
+num_frames = 200
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
@@ -101,21 +101,42 @@ for i in tqdm(range(num_scenarios)):
     ordered_candidates = np.array(list(intruders_dict.keys()))[sorted_idx]
     predicted_A = ordered_candidates[0]
     predicted_As.append(predicted_A)
-    if np.abs(true_A - predicted_A) > 5:
-        tqdm.write(f"Own Vel {own_vels[i]}")
-        tqdm.write(f"True A {true_A}")
-        tqdm.write(f"Highest counters: ")
-        tqdm.write(f"{ordered_candidates[:3]}\n")
 
-    # print(f"intruder poses: {intruder_poses}")
-
-    # print('Plotting candidates...')
-    # # Plotting the intruder positions
     true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
     true_poses = np.array(true_poses)
 
     last_pose_errors.append(np.linalg.norm(true_poses[-1] - est_intruder_poses[-1]))
-    last_pose_errors_adj.append(last_pose_errors[-1] / true_distance[-1])
+    adj_error = last_pose_errors[-1] / true_distance[-1]
+    last_pose_errors_adj.append(adj_error)
+
+    # if np.abs(true_A - predicted_A) > 5:
+    if adj_error > 0.10:
+        tqdm.write(f"Own Vel {own_vels[i]}")
+        tqdm.write(f"True A {true_A}")
+        tqdm.write(f"Intruder Vel {intruder_vel}")
+        tqdm.write(f"Highest counters: ")
+        tqdm.write(f"{ordered_candidates[:3]}\n")
+        plt.figure(i+1)
+        r = intruder_vel * 10
+        t = np.linspace(0, 2 * np.pi, 100)
+        plt.plot(r*np.cos(t), r*np.sin(t), 'k--', alpha=0.5)
+        plt.plot(true_poses[:, 1], true_poses[:, 0], 'b--', label='True Intruder Position')
+        plt.annotate('', xy=(true_poses[-1,1], true_poses[-1,0]), xytext=(true_poses[0,1], true_poses[0,0]),
+                     arrowprops=dict(arrowstyle='->', color='blue', lw=1.5))
+        mav_states = np.array(mav_states)
+        plt.plot(mav_states[:, 1], mav_states[:, 0], 'go', label='Ownship Position', markersize=5)
+        plt.plot(np.array(est_intruder_poses)[:, 1], np.array(est_intruder_poses)[:, 0], 'ro', label='Estimated Intruder Position', markersize=5)
+        plt.xlabel('X Position (m)')
+        plt.ylabel('Y Position (m)')
+        plt.title(f'Estimated vs True Intruder Position (A={predicted_A})')
+        plt.axis('equal')
+        plt.legend()
+        plt.tight_layout()
+    # print(f"intruder poses: {intruder_poses}")
+
+    # print('Plotting candidates...')
+    # # Plotting the intruder positions
+    
 
     if plotting:
         plt.figure(i+1)

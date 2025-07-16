@@ -158,7 +158,7 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
     sorted_As = np.argsort(np.array(mah_dists))
     lowest_As = np.array(list(intruders_dict.keys()))[sorted_As]
 
-    for A in lowest_As[:1]:
+    for A in lowest_As[:2]:
         intruders_dict[A][4] += 1
 
     return intruders_dict
