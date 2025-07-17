@@ -5,8 +5,8 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 50
-num_frames = 200
+num_scenarios = 200
+num_frames = 100
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
