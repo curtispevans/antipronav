@@ -4,6 +4,7 @@ from models.nearly_constant_accel_kf import kalman_update as nearly_constant_acc
 from models.ekf_modified_polar_coordinates_knownA import kalman_update as ekf_modified_polar_knownA_update
 from models.ekf_modified_polar_coordinates_knownA import measurement_model as ekf_modified_polar_measurement_model
 from models.ekf_modified_polar_coordinates_knownA import wrap
+import matplotlib.pyplot as plt
 
 def velocity_mean_function(wingspan):
     beta = np.load('data/regression_coefficients.npy')
@@ -154,6 +155,10 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
+    plt.figure(0)
+    plt.plot(intruders_dict.keys(), mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
+    # plt.show()
+
 
     sorted_As = np.argsort(np.array(mah_dists))
     lowest_As = np.array(list(intruders_dict.keys()))[sorted_As]

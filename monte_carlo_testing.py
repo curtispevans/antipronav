@@ -5,12 +5,12 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 200
+num_scenarios = 1
 num_frames = 100
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
-min_A = 5
+min_A = 2
 max_A = 40
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
@@ -110,7 +110,7 @@ for i in tqdm(range(num_scenarios)):
     last_pose_errors_adj.append(adj_error)
 
     # if np.abs(true_A - predicted_A) > 5:
-    if adj_error > 0.10:
+    if adj_error > 0.1:
         tqdm.write(f"Own Vel {own_vels[i]}")
         tqdm.write(f"True A {true_A}")
         tqdm.write(f"Intruder Vel {intruder_vel}")
