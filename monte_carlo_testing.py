@@ -6,12 +6,14 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 100
+num_frames = 1000
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
-min_A = 2
-max_A = 40
+min_A = 10
+max_A = 30
+
+range_A = np.linspace(min_A, max_A, 30)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
@@ -41,12 +43,13 @@ for i in tqdm(range(num_scenarios)):
 
     intruders_dict = {}
 
-    for k in range(min_A, max_A):
+
+    for k in range_A:
         # Get the position of the intruder
         distance = k/pixel_sizes[0]  # distance in meters
-        bearing = bearings[k]
-        own_pose = mav_states[k][0:2]  # own position
-        own_heading = mav_states[k][2]  # own heading in radians
+        bearing = bearings[0]
+        own_pose = mav_states[0][0:2]  # own position
+        own_heading = mav_states[0][2]  # own heading in radians
         los = np.array([np.cos(bearing + own_heading), np.sin(bearing + own_heading)])
         int_x = own_pose[0] + distance * los[0]
         int_y = own_pose[1] + distance * los[1]
@@ -61,8 +64,8 @@ for i in tqdm(range(num_scenarios)):
     full_inverse_distance = []
     partial_inverse_distance = []
 
-    intruder_poses = {i:[] for i in range(min_A, max_A)}
-    inv_distances = {i:[] for i in range(min_A, max_A)}
+    intruder_poses = {i:[] for i in range_A}
+    inv_distances = {i:[] for i in range_A}
 
     for j in range(len(bearings) - 1):
         bearing = bearings[j+1]
