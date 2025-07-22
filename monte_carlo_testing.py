@@ -5,15 +5,15 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 1
-num_frames = 1000
+num_scenarios = 50
+num_frames = 100
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
-min_A = 10
-max_A = 30
+min_A = 5
+max_A = 40
 
-range_A = np.linspace(min_A, max_A, 30)
+range_A = np.linspace(min_A, max_A, 100)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
