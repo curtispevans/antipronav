@@ -5,20 +5,22 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 1
-num_frames = 1000
-plotting = True
+num_scenarios = 50
+num_frames = 300
+plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 100)
+range_A = np.linspace(min_A, max_A, 50)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
 last_pose_errors = []
 last_pose_errors_adj = []
+scenario_true_As_min_dist = []
+scenario_true_As_voting = []
 
 for i in tqdm(range(num_scenarios)):
     bearings = all_bearings[i]
@@ -86,6 +88,16 @@ for i in tqdm(range(num_scenarios)):
             intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1)
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
+            # scenario_true_As_min_dist.append(intruders_dict['mah_dist_sorted'][0])
+            # highest_counter_list = []
+            # for A in list(intruders_dict.keys())[1:]:
+            #     highest_counter_list.append(intruders_dict[A][4])
+            # sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
+            # ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
+            # predicted_A = ordered_candidates[0]
+            # scenario_true_As_voting.append(predicted_A)
+
+
         
         for A in list(intruders_dict.keys())[1:]:
             # intruder_state = intruders_dict[A][2]
@@ -221,3 +233,14 @@ plt.xlabel('Simulation Iteration')
 plt.ylabel('Last Pose Error Adjusted (m/m)')
 plt.tight_layout()
 plt.show()
+
+# plt.figure(len(all_bearings) + 2)
+# plt.plot(scenario_true_As_min_dist, 'r-', label='Predicted A')
+# plt.plot(scenario_true_As_voting, 'y-', label='Voting A')
+# plt.plot(np.ones(len(scenario_true_As_min_dist))*np.array(true_As_vels)[:,0], 'b-', label='True A)')
+# plt.xlabel('Simulation Iteration')
+# plt.ylabel('A (m)')
+# plt.title('Predicted A vs True A')
+# plt.legend()
+# plt.tight_layout()
+# plt.show()

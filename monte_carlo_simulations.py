@@ -4,8 +4,8 @@ from models.mav_dynamics import MavDynamics
 from IPython.core.debugger import set_trace
 
 # np.random.seed(42)  # For reproducibility
-np.random.seed(13)
-# np.random.seed(11)
+# np.random.seed(13)
+np.random.seed(11)
 
 def get_random_ownship_start_pose(x_min, x_max, y_min, y_max):
     start_pose_x = np.random.uniform(x_min, x_max)

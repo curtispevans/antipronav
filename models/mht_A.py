@@ -155,9 +155,9 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
-    plt.figure(0)
-    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
-    plt.pause(0.01)
+    # plt.figure(0)
+    # plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
+    # plt.pause(0.01)
     # plt.show()
 
 
@@ -172,15 +172,15 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
     return intruders_dict
         
 def get_best_estimated_intruder_pose(intruders_dict):
-    # highest = -1
-    # best_state = None
-    # for A in intruders_dict.keys():
-    #     if intruders_dict[A][4] > highest:
-    #         highest = intruders_dict[A][4]
-    #         best_state = intruders_dict[A][2][:2]
+    highest = -1
+    best_state = None
+    for A in list(intruders_dict.keys())[1:]:
+        if intruders_dict[A][4] > highest:
+            highest = intruders_dict[A][4]
+            best_state = intruders_dict[A][2][:2]
     # print('mah_dist_sorted', intruders_dict['mah_dist_sorted'])
-    best_A = intruders_dict['mah_dist_sorted'][0]
-    best_state = intruders_dict[best_A][2][:2]
+    # best_A = intruders_dict['mah_dist_sorted'][0]
+    # best_state = intruders_dict[best_A][2][:2]
     return best_state
 
 def get_g_force_probability(g_force):
