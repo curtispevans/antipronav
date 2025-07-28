@@ -6,10 +6,10 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 500
-plotting = False
+num_frames = 1000
+plotting = True
 
-all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, plotting)
+all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 min_A = 5
 max_A = 40
 
@@ -41,7 +41,7 @@ for i in tqdm(range(num_scenarios)):
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
     R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
 
-    intruders_dict = {}
+    intruders_dict = {'mah_dist_sorted':[]}
 
 
     for k in range_A:
@@ -87,7 +87,7 @@ for i in tqdm(range(num_scenarios)):
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
         
-        for A in intruders_dict.keys():
+        for A in list(intruders_dict.keys())[1:]:
             # intruder_state = intruders_dict[A][2]
             intruder_state = intruders_dict[A][2][:2]
             intruder_poses[A].append(intruder_state[0:2])
@@ -97,11 +97,11 @@ for i in tqdm(range(num_scenarios)):
     # print(f"Remaining Candidates for A:\n", intruders_dict.keys())
     
     highest_counter_list = []
-    for A in intruders_dict.keys():
+    for A in list(intruders_dict.keys())[1:]:
         highest_counter_list.append(intruders_dict[A][4])
         # print(A, intruders_dict[A][4])
     sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
-    ordered_candidates = np.array(list(intruders_dict.keys()))[sorted_idx]
+    ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
     predicted_A = ordered_candidates[0]
     predicted_As.append(predicted_A)
 
