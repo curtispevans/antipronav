@@ -5,7 +5,7 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 50
+num_scenarios = 1
 num_frames = 300
 plotting = False
 
@@ -88,14 +88,14 @@ for i in tqdm(range(num_scenarios)):
             intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1)
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
-            # scenario_true_As_min_dist.append(intruders_dict['mah_dist_sorted'][0])
-            # highest_counter_list = []
-            # for A in list(intruders_dict.keys())[1:]:
-            #     highest_counter_list.append(intruders_dict[A][4])
-            # sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
-            # ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
-            # predicted_A = ordered_candidates[0]
-            # scenario_true_As_voting.append(predicted_A)
+            scenario_true_As_min_dist.append(intruders_dict['mah_dist_sorted'][0])
+            highest_counter_list = []
+            for A in list(intruders_dict.keys())[1:]:
+                highest_counter_list.append(intruders_dict[A][4])
+            sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
+            ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
+            predicted_A = ordered_candidates[0]
+            scenario_true_As_voting.append(predicted_A)
 
 
         
@@ -234,13 +234,13 @@ plt.ylabel('Last Pose Error Adjusted (m/m)')
 plt.tight_layout()
 plt.show()
 
-# plt.figure(len(all_bearings) + 2)
-# plt.plot(scenario_true_As_min_dist, 'r-', label='Predicted A')
-# plt.plot(scenario_true_As_voting, 'y-', label='Voting A')
-# plt.plot(np.ones(len(scenario_true_As_min_dist))*np.array(true_As_vels)[:,0], 'b-', label='True A)')
-# plt.xlabel('Simulation Iteration')
-# plt.ylabel('A (m)')
-# plt.title('Predicted A vs True A')
-# plt.legend()
-# plt.tight_layout()
-# plt.show()
+plt.figure(len(all_bearings) + 2)
+plt.plot(scenario_true_As_min_dist, 'r-', label='Predicted A')
+plt.plot(scenario_true_As_voting, 'y-', label='Voting A')
+plt.plot(np.ones(len(scenario_true_As_min_dist))*np.array(true_As_vels)[:,0], 'b-', label='True A)')
+plt.xlabel('Simulation Iteration')
+plt.ylabel('A (m)')
+plt.title('Predicted A vs True A')
+plt.legend()
+plt.tight_layout()
+plt.show()
