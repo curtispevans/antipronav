@@ -2,12 +2,13 @@ import models.mht_A_jax as mht
 from monte_carlo_simulations import get_simulated_data
 import numpy as np
 from jax import jacfwd
+import matplotlib.pyplot as plt
 
 Ts = 1/30
 num_scenarios = 1
 num_frames = 300
 plotting = False
-A = 16.0
+A = 15.0
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
@@ -55,8 +56,19 @@ for j in range(len(bearings)-1):
     
     jacobian_A = J(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
 
+    plt.plot(own_mav[1], own_mav[0], 'ro', label='Ownship Position')
+    plt.plot(mu_nca[1], mu_nca[0], 'bo', label='NCA Estimate Position')
+    true_pose = own_mav[:2] + np.array([np.cos(bearing + own_mav[2]), np.sin(bearing + own_mav[2])]) * true_distance[j+1]
+    plt.plot(true_pose[1], true_pose[0], 'go', label='True Intruder Position')
+    # plt.legend()
+    plt.title(f'Frame {j+1} - Intruder Position Estimate')
+    plt.xlabel('X Position (m)')
+    plt.ylabel('Y Position (m)')
+    plt.pause(0.01)
+
     print(jacobian_A)
 
+plt.show()
 
 
     
