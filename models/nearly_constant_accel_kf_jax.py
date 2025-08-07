@@ -1,14 +1,16 @@
 from jax import numpy as jnp
+from jax import config
+config.update('jax_enable_x64', True)
 
 def f(x, Ts):
     '''
     x: state vector x=[pos_x, pos_y, vel_x, vel_y, acc_x, acc_y]
     '''
-    A = jnp.block([[jnp.eye(2), Ts * jnp.eye(2), Ts**2/2 * jnp.eye(2)],
+    F = jnp.block([[jnp.eye(2), Ts * jnp.eye(2), Ts**2/2 * jnp.eye(2)],
                   [jnp.zeros((2,2)), jnp.eye(2), Ts * jnp.eye(2)],
                   [jnp.zeros((2,2)), jnp.zeros((2,2)), jnp.eye(2)]])
     
-    return A @ x, A
+    return F @ x, F
 
 def barrier_function(x, barrier=0.1):
     '''
@@ -33,11 +35,10 @@ def y(x):
 
 def kalman_update(mu, sigma, measurement, Q, R, Ts):
     # Prediction
-    mu, A = f(mu, Ts)
+    mu, F = f(mu, Ts)
     tol = jnp.linalg.det(sigma[-2:, -2:])
     mu = barrier_function(mu, tol)
-    # print(np.linalg.norm(mu[4:6]))
-    sigma = A @ sigma @ A.T + Q
+    sigma = F @ sigma @ F.T + Q
 
     # Measurement update
     z, C = y(mu)

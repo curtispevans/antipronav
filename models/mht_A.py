@@ -149,9 +149,13 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
         measurement_pos = get_position_of_intruder(state, mav)
 
-        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R)
+        print_inno = False
+        if 16 < A and A < 17:
+            print_inno = True
+
+        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
         mah_dists.append(D2)
-        # print(A, D2)
+          
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
@@ -241,15 +245,18 @@ def get_mahalanobis_distance_pixel_size(state, sigma, measurement, R, A):
 
     return D2
 
-def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R):
+def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R, print_inno):
     C = np.array([[1, 0, 0, 0, 0, 0],
                   [0, 1, 0, 0, 0, 0]])
     hx = C @ state
     innovation = measurement - hx
     
     S = C @ sigma @ C.T + R
-    # print(innovation, '\n', S)
+    
     D2 = innovation.T @ np.linalg.inv(S) @ innovation
+
+    if print_inno:
+        print(D2)
     return D2
 
 

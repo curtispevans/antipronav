@@ -3,12 +3,14 @@ from monte_carlo_simulations import get_simulated_data
 import numpy as np
 from jax import jacfwd
 import matplotlib.pyplot as plt
+from jax import config
+config.update('jax_enable_x64', True)
 
 Ts = 1/30
 num_scenarios = 1
 num_frames = 300
 plotting = False
-A = 15.0
+A = 16.42857142857143
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
@@ -51,7 +53,7 @@ for j in range(len(bearings)-1):
 
     measurement = np.array([bearing, pixel_size])
 
-    mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2_mpc = mht.update_all_filters(
+    mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2 = mht.update_all_filters(
         mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
     
     jacobian_A = J(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
@@ -66,7 +68,7 @@ for j in range(len(bearings)-1):
     plt.ylabel('Y Position (m)')
     plt.pause(0.01)
 
-    print(jacobian_A)
+    print(D2)#, jacobian_A)
 
 plt.show()
 

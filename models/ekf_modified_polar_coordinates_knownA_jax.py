@@ -1,6 +1,8 @@
 from jax import jacfwd
 import jax.numpy as jnp
 import numpy as np
+from jax import config
+config.update('jax_enable_x64', True)
 
 
 def f(x, own_mav, u, A=20):
@@ -66,9 +68,8 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=20):
     sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
     mu = jnp.array(mu_bar)
-    mu.at[0].set(mu_bar[0])  # los_x
+    mu.at[0].set(wrap(mu_bar[0]))  # wrap the bearing angle velocity
     mu.at[2].set(wrap(mu_bar[2]))  # wrap the bearing angle
-    # mu[2] = wrap(mu[2])
     sigma = sigma_bar
     
     return mu, sigma 

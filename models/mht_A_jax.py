@@ -1,8 +1,10 @@
 import numpy as np
 from jax import numpy as jnp
-from jax import jacfwd
+import jax
 from models.ekf_modified_polar_coordinates_knownA_jax import kalman_update as ekf_mpc_update
 from models.nearly_constant_accel_kf_jax import kalman_update as kf_nca_update
+from jax import config
+config.update('jax_enable_x64', True)
 
 
 def get_position_of_intruder(state, mav):
@@ -34,9 +36,9 @@ def update_all_filters(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca
     mu_nca, sigma_nca = kf_nca_update(mu_nca, sigma_nca, intruder_pos, Q_nca, R_nca, Ts)
 
     # compute mahalanobis distance
-    D2_mpc = get_mahalanobis_distance_intruder_state(mu_nca, sigma_nca, intruder_pos, R_mpc)
+    D2 = get_mahalanobis_distance_intruder_state(mu_nca, sigma_nca, intruder_pos, R_nca)
 
-    return mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2_mpc
+    return mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2
 
 def wrapper_update_all_filters(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, mav, u, A):
     '''
@@ -54,6 +56,8 @@ def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R):
     innovation = measurement - hx
     
     S = C @ sigma @ C.T + R
+    
     D2 = innovation.T @ jnp.linalg.inv(S) @ innovation
+    # print(innovation)
     return D2
 
