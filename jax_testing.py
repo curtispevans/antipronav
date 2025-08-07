@@ -11,6 +11,7 @@ num_scenarios = 1
 num_frames = 300
 plotting = False
 A = 16.42857142857143
+# A = 5
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
@@ -45,6 +46,8 @@ sigma_nca = np.eye(6)*1**2
 
 J = jacfwd(mht.wrapper_update_all_filters, argnums=12)
 
+gradients = []
+
 for j in range(len(bearings)-1):
     bearing = bearings[j+1]
     pixel_size = pixel_sizes[j+1]
@@ -58,19 +61,22 @@ for j in range(len(bearings)-1):
     
     jacobian_A = J(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
 
-    plt.plot(own_mav[1], own_mav[0], 'ro', label='Ownship Position')
-    plt.plot(mu_nca[1], mu_nca[0], 'bo', label='NCA Estimate Position')
-    true_pose = own_mav[:2] + np.array([np.cos(bearing + own_mav[2]), np.sin(bearing + own_mav[2])]) * true_distance[j+1]
-    plt.plot(true_pose[1], true_pose[0], 'go', label='True Intruder Position')
-    # plt.legend()
-    plt.title(f'Frame {j+1} - Intruder Position Estimate')
-    plt.xlabel('X Position (m)')
-    plt.ylabel('Y Position (m)')
-    plt.pause(0.01)
+    # plt.plot(own_mav[1], own_mav[0], 'ro', label='Ownship Position')
+    # plt.plot(mu_nca[1], mu_nca[0], 'bo', label='NCA Estimate Position')
+    # true_pose = own_mav[:2] + np.array([np.cos(bearing + own_mav[2]), np.sin(bearing + own_mav[2])]) * true_distance[j+1]
+    # plt.plot(true_pose[1], true_pose[0], 'go', label='True Intruder Position')
+    # # plt.legend()
+    # plt.title(f'Frame {j+1} - Intruder Position Estimate')
+    # plt.xlabel('X Position (m)')
+    # plt.ylabel('Y Position (m)')
+    # plt.pause(0.01)
 
-    print(D2)#, jacobian_A)
+    
+    gradients.append(jacobian_A)
+    # print(jacobian_A)
 
-plt.show()
+# plt.show()
+np.save('gradients.npy', np.array(gradients))
 
 
     

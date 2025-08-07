@@ -22,6 +22,8 @@ last_pose_errors_adj = []
 scenario_true_As_min_dist = []
 scenario_true_As_voting = []
 
+gradients = np.load('gradients.npy')
+
 for i in tqdm(range(num_scenarios)):
     bearings = all_bearings[i]
     mav_states = all_mav_states[i]
@@ -85,7 +87,7 @@ for i in tqdm(range(num_scenarios)):
 
         # Filter candidates
         if j > 30:
-            intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1)
+            intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1, gradients[j])
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
             scenario_true_As_min_dist.append(intruders_dict['mah_dist_sorted'][0])

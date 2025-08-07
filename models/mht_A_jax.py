@@ -58,6 +58,6 @@ def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R):
     S = C @ sigma @ C.T + R
     
     D2 = innovation.T @ jnp.linalg.inv(S) @ innovation
-    # print(innovation)
+    # print(D2)
     return D2
 
