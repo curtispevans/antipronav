@@ -21,8 +21,12 @@ def update_all_filters(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca
     Update both MPC and NCA filters with the same measurement.
     mu_mpc, sigma_mpc: state and covariance for MPC
     mu_nca, sigma_nca: state and covariance for NCA
+    Q_mpc, R_mpc: process and measurement noise for MPC
+    Q_nca, R_nca: process and measurement noise for NCA
     bearing_pixel_measurement: measurement to update with
     Ts: time step
+    mav: own MAV state
+    u: control input
     A: constant used in the MPC measurement model
     '''
     

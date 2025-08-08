@@ -21,7 +21,8 @@ def barrier_function(x, barrier=0.1):
     # if acceleration > barrier:  # Maximum acceleration threshold
     #     # print('here')
     #     x[4:6] = barrier*x[4:6] / acceleration   # Barrier condition violated
-    x.at[4:6].set(jnp.where(acceleration <= barrier, x[4:6], barrier*x[4:6] / acceleration))
+    x.at[4:6].set(jnp.where(acceleration > barrier, barrier*x[4:6] / acceleration, x[4:6]))
+    # print(x[4:6])
     return x  # Barrier condition satisfied
 
 
@@ -37,7 +38,7 @@ def kalman_update(mu, sigma, measurement, Q, R, Ts):
     # Prediction
     mu, F = f(mu, Ts)
     tol = jnp.linalg.det(sigma[-2:, -2:])
-    # mu = barrier_function(mu, tol)
+    mu = barrier_function(mu, tol)
     sigma = F @ sigma @ F.T + Q
 
     # Measurement update

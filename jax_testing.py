@@ -8,13 +8,15 @@ config.update('jax_enable_x64', True)
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 20
+num_frames = 50
 plotting = False
-A = 16.42857142857143
+# A = 16.42857142857143
 # A = 5
 As = np.linspace(5, 40, 50)
+# As = [16.42857142857143]
 # print(As)
 D2s = []
+grad_16 = []
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
@@ -62,7 +64,7 @@ for A in As:
         mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2 = mht.update_all_filters(
             mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
         
-        jacobian_A = J(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
+        
 
         # plt.plot(own_mav[1], own_mav[0], 'ro', label='Ownship Position')
         # plt.plot(mu_nca[1], mu_nca[0], 'bo', label='NCA Estimate Position')
@@ -79,17 +81,31 @@ for A in As:
         #     y = jacobian_A*(x - A) + D2
         #     plt.plot(x, y, 'g-', alpha=0.5)
         # gradients.append(jacobian_A)
+        # if 16 < A and A < 17:
+            # gradients.append(jacobian_A)
+            # print(jacobian_A)
+            # grad_16.append(jacobian_A)
         # print(jacobian_A)
-        D2s_A.append(D2)
+        if j > 40:
+            if 16 < A and A < 17:
+                jacobian_A = J(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca, R_nca, measurement, Ts, own_mav, u, A)
+                print(jacobian_A)
+            D2s_A.append(D2)
     D2s.append(D2s_A)
 
 # plt.show()
 # np.save('gradients.npy', np.array(gradients))
 # print(D2s)
 # print(len(D2s), len(D2s[0]))
+# print(len(grad_16), len(D2s), len(bearings))
+x = np.linspace(16.41, 16.43, 100)
 for i in range(len(D2s[0])):
     plt.plot(As, [D2s[j][i] for j in range(len(D2s))], 'b-', alpha=0.5, label=f'Frame {i+1}')
-
+    # print(grad_16[i])
+    # y = grad_16[i]*(x - As[16]) + D2s[16][i]
+    # plt.plot(x, y, 'g-', alpha=0.5)
+    # plt.xlim(16.41, 16.43)
+    # plt.ylim(-0.01, 0.5)
     plt.pause(0.01)
 
 
