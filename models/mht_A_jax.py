@@ -28,6 +28,7 @@ def update_all_filters(mu_mpc, sigma_mpc, mu_nca, sigma_nca, Q_mpc, R_mpc, Q_nca
     
     # Update MPC filter
     mu_mpc, sigma_mpc = ekf_mpc_update(mu_mpc, sigma_mpc, mav, u, bearing_pixel_measurement, Q_mpc, R_mpc, Ts, A)
+    
 
     # Get the position of the intruder using the MPC state
     intruder_pos = get_position_of_intruder(mu_mpc, mav)

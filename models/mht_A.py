@@ -150,9 +150,9 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         measurement_pos = get_position_of_intruder(state, mav)
 
         print_inno = False
-        if 16 < A and A < 17:
-            x = np.linspace(5, 40, 100)
-            y = 0.0*(x - A) + D2
+        # if 16 < A and A < 17:
+        #     x = np.linspace(5, 40, 100)
+        #     y = gradient*(x - A) + D2
 
         D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
         mah_dists.append(D2)
@@ -161,13 +161,13 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
     plt.figure(0)
-    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
-    plt.plot(x, y, 'g-', alpha=0.05)
+    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
+    # plt.plot(x, y, 'g-', alpha=0.5)
     plt.xlabel('Candidate A')
     plt.ylabel('Mahalanobis distance')
     plt.title('Mahalanobis distances of candidates')
-    plt.xlim(4, 40)
-    plt.ylim(-0.01, 0.5)
+    # plt.xlim(4, 40)
+    # plt.ylim(-0.01, 0.5)
     plt.pause(0.01)       
     # plt.show()
 
