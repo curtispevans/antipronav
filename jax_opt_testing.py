@@ -20,7 +20,7 @@ true_distance = all_true_distance[0]
 us = all_us[0]
 mav_states = all_mav_states[0]
 
-initial_A = 10.0
+initial_A = 15.0
 
 mu_mpc = np.array([0, 0, bearings[0], 1/true_distance[0]])
 sigma_mpc = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
@@ -46,24 +46,35 @@ sigma_nca = np.eye(6)*1**2
 
 initial_states = (mu_mpc, sigma_mpc, mu_nca, sigma_nca)
 
-measurements = jnp.array([jnp.array([bearing, pixel_size]) for bearing, pixel_size in zip(bearings, pixel_sizes)])
-us = jnp.array(us)
-mav_states = jnp.array(mav_states)
+measurements = jnp.array([jnp.array([bearing, pixel_size]) for bearing, pixel_size in zip(bearings[1:], pixel_sizes[1:])])
+us = jnp.array(us[1:])
+mav_states = jnp.array(mav_states[1:])
+
+for i in range(30):
+    mu_mpc, sigma_mpc, mu_nca, sigma_nca, D2 = mht.update_all_filters(
+        mu_mpc, sigma_mpc, mu_nca, sigma_nca,
+        Q_mpc, R_mpc, Q_nca, R_nca,
+        measurements[i], Ts, mav_states[i], us[i], initial_A
+    )
+
+
+initial_states = (mu_mpc, sigma_mpc, mu_nca, sigma_nca)
+
 
 A_opt, history = mht.optimize_A(
     initial_states,
-    measurements,
-    mav_states,
-    us, 
+    measurements[30:],
+    mav_states[30:],
+    us[30:], 
     Ts,
     Q_mpc,
     R_mpc,
     Q_nca,
     R_nca,
-    num_frames,
+    num_frames - 30,
     A_init=initial_A,
     learning_rate=0.01,
-    num_iters=1000,
+    num_iters=10,
 )
 
 print(f'Optimized A: {A_opt}')
