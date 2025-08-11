@@ -18,12 +18,8 @@ def barrier_function(x, barrier=0.1):
     '''
     # Barrier function to ensure the intruder does not get too aggressive in acceleration
     acceleration = jnp.linalg.norm(x[4:6])
-    # if acceleration > barrier:  # Maximum acceleration threshold
-    #     # print('here')
-    #     x[4:6] = barrier*x[4:6] / acceleration   # Barrier condition violated
     x.at[4:6].set(jnp.where(acceleration > barrier, barrier*x[4:6] / acceleration, x[4:6]))
-    # print(x[4:6])
-    return x  # Barrier condition satisfied
+    return x 
 
 
 def y(x):
@@ -32,7 +28,7 @@ def y(x):
     '''
     C = jnp.array([[1, 0, 0, 0, 0, 0],
                   [0, 1, 0, 0, 0, 0]])
-    return C @ x, C
+    return jnp.array([x[0], x[1]]), C
 
 def kalman_update(mu, sigma, measurement, Q, R, Ts):
     # Prediction
@@ -43,10 +39,12 @@ def kalman_update(mu, sigma, measurement, Q, R, Ts):
 
     # Measurement update
     z, C = y(mu)
+
+    innovation = measurement - z
     S = C @ sigma @ C.T + R
     K = sigma @ C.T @ jnp.linalg.inv(S)
 
-    mu = mu + K @ (measurement - z)
+    mu = mu + K @ innovation
     sigma = (jnp.eye(len(mu)) - K @ C) @ sigma @ (jnp.eye(len(mu)) - K @ C).T + K @ R @ K.T
 
     return mu, sigma

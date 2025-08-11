@@ -20,9 +20,7 @@ def f(x, own_mav, u, A=20):
     return f_
 
 def jacobian_f(fun, x, own_mav, u, A=20):
-    F = jacfwd(fun, argnums=0)
-    Fx = F(x, own_mav, u, A)
-    return Fx
+    return jacfwd(fun, argnums=0)(x, own_mav, u, A)
 
 
 def measurement_model(x, A=20):
@@ -47,7 +45,6 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=20):
     mu = mu + delta_t*f(mu, own_mav, u, A)
     J = jacobian_f(f, mu, own_mav, u, A)
     Jd = jnp.eye(len(mu)) + delta_t*J + 0.5*delta_t**2*J@J
-    # sigma = Jd @ sigma @ Jd.T + delta_t**2*Q
     sigma = Jd @ sigma @ Jd.T + Q
 
     mu_bar = mu
@@ -58,18 +55,17 @@ def kalman_update(mu, sigma, own_mav, u, measurement, Q, R, delta_t, A=20):
     H = jacobian_measurement_model(mu_bar, A)
     S = H@sigma_bar@H.T + R
     K = sigma_bar@H.T@jnp.linalg.inv(S)
-    # innovation = wrap(measurement - z, dim=0)
+    
     innovation = jnp.array(measurement - z)
-    # innovation[0] = wrap(innovation[0])
     innovation.at[0].set(wrap(innovation[0]))  # wrap the bearing angle
-    # print(innovation)
-    mu_bar = mu_bar + K@(innovation)
-    I = jnp.eye(len(K))
-    sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
 
+    mu_bar = mu_bar + K@(innovation)
     mu = jnp.array(mu_bar)
     mu.at[0].set(wrap(mu_bar[0]))  # wrap the bearing angle velocity
     mu.at[2].set(wrap(mu_bar[2]))  # wrap the bearing angle
+
+    I = jnp.eye(len(K))
+    sigma_bar = (I - K@H)@sigma_bar@(I - K@H).T + K@R@K.T
     sigma = sigma_bar
     
     return mu, sigma 
