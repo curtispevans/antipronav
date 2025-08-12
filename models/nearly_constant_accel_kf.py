@@ -34,7 +34,7 @@ def kalman_update(mu, sigma, measurement, Q, R, Ts):
     # Prediction
     mu, A = f(mu, Ts)
     tol = np.linalg.det(sigma[-2:, -2:])
-    # mu = barrier_function(mu, tol)
+    mu = barrier_function(mu, tol)
     # print(np.linalg.norm(mu[4:6]))
     sigma = A @ sigma @ A.T + Q
 

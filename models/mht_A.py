@@ -3,6 +3,7 @@ from scipy.stats import halfnorm, norm, multivariate_normal
 from models.nearly_constant_accel_kf import kalman_update as nearly_constant_accel_kf_update
 from models.ekf_modified_polar_coordinates_knownA import kalman_update as ekf_modified_polar_knownA_update
 from models.ekf_modified_polar_coordinates_knownA import measurement_model as ekf_modified_polar_measurement_model
+from models.ekf_modified_polar_coordinates_unknownA import kalman_update as ekf_modified_polar_unknownA_update
 from models.ekf_modified_polar_coordinates_knownA import wrap
 import matplotlib.pyplot as plt
 
@@ -160,15 +161,15 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
-    plt.figure(0)
-    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
-    # plt.plot(x, y, 'g-', alpha=0.5)
-    plt.xlabel('Candidate A')
-    plt.ylabel('Mahalanobis distance')
-    plt.title('Mahalanobis distances of candidates')
-    # plt.xlim(4, 40)
-    # plt.ylim(-0.01, 0.5)
-    plt.pause(0.01)       
+    # plt.figure(0)
+    # plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
+    # # plt.plot(x, y, 'g-', alpha=0.5)
+    # plt.xlabel('Candidate A')
+    # plt.ylabel('Mahalanobis distance')
+    # plt.title('Mahalanobis distances of candidates')
+    # # plt.xlim(4, 40)
+    # # plt.ylim(-0.01, 0.5)
+    # plt.pause(0.01)       
     # plt.show()
 
 
@@ -263,6 +264,22 @@ def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R, print_
     #     print(D2)
     return D2
 
+def propagate_mpc_unknownA(mu, sigma, own_mav, u, measurement, Q, R, Ts):
+    '''
+    Propagate the MPC filter with unknown A.
+    '''
+    mu, sigma = ekf_modified_polar_unknownA_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
+
+    return mu, sigma
+
+def get_mu_sigma_from_mosted_voted_A(intruders_dict):
+    '''
+    Get the mu and sigma from the most voted A.
+    '''
+    most_voted_A = max(list(intruders_dict.keys())[1:], key=lambda k: intruders_dict[k][4])
+    mu = intruders_dict[most_voted_A][0]
+    sigma = intruders_dict[most_voted_A][1]
+    return mu, sigma, most_voted_A
 
 
 
