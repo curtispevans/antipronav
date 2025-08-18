@@ -17,6 +17,7 @@ range_A = np.linspace(min_A, max_A, 50)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 # predicted_As = []
+pred_As_scenario = []
 last_pose_errors = []
 last_pose_errors_adj = []
 scenario_true_As_min_dist = []
@@ -92,7 +93,7 @@ for i in tqdm(range(num_scenarios)):
             mu_mpc_unknownA, sigma_mpc_unknownA, A = mht.get_mu_sigma_from_mosted_voted_A(intruders_dict)
             mu_mpc_unknownA = np.array([*mu_mpc_unknownA, A])
             sigma_mpc_unknownA = np.block([[sigma_mpc_unknownA, np.zeros((4, 1))],
-                                            [np.zeros((1, 4)), 0.25**2]])
+                                            [np.zeros((1, 4)), 0.1**2]])
             Q_mpc_unknownA = np.block([[Q_inverse_distance, np.zeros((4, 1))],
                                         [np.zeros((1, 4)), 1e-9**2]])
             R_mpc_unknownA = R_inverse_distance.copy()
@@ -137,7 +138,9 @@ for i in tqdm(range(num_scenarios)):
         # print(A, intruders_dict[A][4])
     sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
     ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
-    predicted_A = ordered_candidates[0]
+    # predicted_A = ordered_candidates[0]
+    pred_As_scenario.append(mu_mpc_unknownA[-1])
+
     # predicted_As.append(predicted_A)
 
     true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
@@ -242,7 +245,7 @@ for i in tqdm(range(num_scenarios)):
 
 plt.figure(len(all_bearings) + 1)
 plt.subplot(311)
-plt.bar(np.arange(num_scenarios), np.abs(np.array(true_As_vels)[:,0] - np.array(predicted_As)))
+plt.bar(np.arange(num_scenarios), np.abs(np.array(true_As_vels)[:,0] - np.array(pred_As_scenario)))
 plt.xlabel('Simulation Iteration')
 plt.ylabel('Error of true A')
 plt.title("Error of true A Plot")
