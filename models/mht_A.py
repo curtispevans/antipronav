@@ -161,7 +161,7 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
-    # plt.figure(0)
+    # plt.figure(-2)
     # plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
     # # plt.plot(x, y, 'g-', alpha=0.5)
     # plt.xlabel('Candidate A')
@@ -178,7 +178,7 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
     lowest_As = np.array(list(intruders_dict.keys())[1:])[sorted_As]
     intruders_dict['mah_dist_sorted'] = lowest_As
 
-    for A in lowest_As[:2]:
+    for A in lowest_As[:1]:
         intruders_dict[A][4] += 1
 
     return intruders_dict

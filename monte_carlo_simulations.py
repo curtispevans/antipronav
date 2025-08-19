@@ -60,8 +60,8 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
         ownship_velocities.append(ownship_velocity)
         ownship = MavDynamics([*ownship_start_pose, ownship_heading, ownship_velocity], Ts)
         u = 0.05 + 0*np.random.uniform(-0.7, 0.7)  # Random control input for the ownship
-
-        A, intruder_velocity = wingspan_cruise_speed[2 + 0*np.random.choice(np.arange(len(wingspan_cruise_speed)))]
+        # 2 gets cessna, -3 gets baron, -1 Beechcraft King Air, 13 gets boeing 757, 3 gets Cirrus, 0 gets bombardier
+        A, intruder_velocity = wingspan_cruise_speed[0 + 0*np.random.choice(np.arange(len(wingspan_cruise_speed)))]
         mav2 = get_random_intruder(ownship, intruder_velocity)
         
         current_scenario_bearings = []
@@ -77,7 +77,7 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
             ownship.update(u)
             mav2.update(0)  # Assuming no control input for the intruder
             distance = np.linalg.norm(ownship._state[:2] - mav2._state[:2])
-            bearing = np.arctan2(mav2._state[1] - ownship._state[1], mav2._state[0] - ownship._state[0])
+            bearing = np.arctan2(mav2._state[1] - ownship._state[1], mav2._state[0] - ownship._state[0]) 
             relative_bearing = (bearing - ownship._state[2]) % (2 * np.pi)
             if relative_bearing > np.pi:
                 relative_bearing -= 2 * np.pi
