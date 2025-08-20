@@ -13,11 +13,10 @@ all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_A
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 100)
+range_A = np.linspace(min_A, max_A, 50)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
-# predicted_As = []
-pred_As_scenario = []
+predicted_As = []
 last_pose_errors = []
 last_pose_errors_adj = []
 scenario_true_As_min_dist = []
@@ -34,27 +33,17 @@ for i in tqdm(range(num_scenarios)):
     true_A, intruder_vel = true_As_vels[i]
 
     est_intruder_poses = []
-    predicted_As = []
-    std_As = []
-    pose_errors = []
-    pose_normalized_errors = []
-    dist_with_errors = []
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    # sigma_inverse_distance = np.diag(np.array([np.radians(3), 3, np.radians(3), 3]))**2
-    Q_inverse_distance = np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
-    # Q_inverse_distance = np.diag(np.array([np.radians(0.1), 1e-3, np.radians(0.1), 1e-3]))**2
-    R_inverse_distance = np.diag(np.array([np.radians(0.0001), 0.0001]))**2  
-    # R_inverse_distance = np.diag(np.array([np.radians(0.04), np.radians(0.12)]))**2   
+    Q_inverse_distance = np.diag(np.array([np.radians(0.001), 1e-5, np.radians(0.001), 1e-5]))**2
+    R_inverse_distance = np.diag(np.array([np.radians(0.04), np.radians(0.14)]))**2   
 
-    Q_tmp = np.eye(2)*0.01**2
+    Q_tmp = np.eye(2)*1e-5**2
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    # Q_nearly_constant_accel = np.diag([0.001]*6)**2
-    R_nearly_constant_accel = np.diag(np.array([1e-5, 1e-5]))**2
-    # R_nearly_constant_accel = np.diag(np.array([1e-2, 1e-2]))**2
+    R_nearly_constant_accel = np.diag(np.array([0.1, 0.1]))**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 
@@ -72,7 +61,7 @@ for i in tqdm(range(num_scenarios)):
         # vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
         mu_nearly_constant_accel = np.array([int_x, int_y, 0, 0, 0, 0])
-        sigma_nearly_constant_accel = np.eye(6)*1**2
+        sigma_nearly_constant_accel = np.eye(6)*0.1**2
         filter_counter = 0
         intruders_dict[k] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy(), filter_counter]
 
@@ -82,51 +71,22 @@ for i in tqdm(range(num_scenarios)):
     intruder_poses = {i:[] for i in range_A}
     inv_distances = {i:[] for i in range_A}
 
-    true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
-
     for j in range(len(bearings) - 1):
-        bearing = bearings[j+1] #+ np.random.normal(0, np.radians(0.04))
-        pixel_size = pixel_sizes[j+1] #+ np.random.normal(0, np.radians(0.12))
+        bearing = bearings[j+1] + np.random.normal(0, np.radians(0.04))
+        pixel_size = pixel_sizes[j+1] + np.random.normal(0, np.radians(0.12))
         u = us[j+1]
         own_mav = mav_states[j+1]
 
         measurement = np.array([bearing, pixel_size])
+        
+        # Propagate candidates for inverse distance
+        intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
+        
+        # Propagate candidates for nearly constant acceleration
+        intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
-        if j < 60:
-            # Propagate candidates for inverse distance
-            intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
-            
-            # Propagate candidates for nearly constant acceleration
-            intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
-
-        if j == 60:
-            mu_mpc_unknownA, sigma_mpc_unknownA, A = mht.get_mu_sigma_from_mosted_voted_A(intruders_dict)
-            mu_mpc_unknownA = np.array([*mu_mpc_unknownA, A])
-            sigma_mpc_unknownA = np.block([[sigma_mpc_unknownA, np.zeros((4, 1))],
-                                            [np.zeros((1, 4)), 0.0001**2]])
-            Q_mpc_unknownA = np.block([[Q_inverse_distance, np.zeros((4, 1))],
-                                        [np.zeros((1, 4)), 1e-9**2]])
-            R_mpc_unknownA = R_inverse_distance.copy()
-            mu_mpc_unknownA, sigma_mpc_unknownA = mht.propagate_mpc_unknownA(mu_mpc_unknownA, sigma_mpc_unknownA, own_mav, u, measurement, Q_mpc_unknownA, R_mpc_unknownA, Ts)
-            est_intruder_poses.append(mht.get_position_of_intruder(mu_mpc_unknownA, own_mav))
-            predicted_As.append(mu_mpc_unknownA[-1])
-            std_As.append(np.sqrt(sigma_mpc_unknownA[-1, -1]))
-            error = np.linalg.norm(true_poses[j+1] - mht.get_position_of_intruder(mu_mpc_unknownA, own_mav))
-            pose_errors.append(error)
-            pose_normalized_errors.append(error / true_distance[j+1])
-            dist_with_errors.append(true_distance[j+1])
-
-        if j > 60:
-            mu_mpc_unknownA, sigma_mpc_unknownA = mht.propagate_mpc_unknownA(mu_mpc_unknownA, sigma_mpc_unknownA, own_mav, u, measurement, Q_mpc_unknownA, R_mpc_unknownA, Ts)
-            est_intruder_poses.append(mht.get_position_of_intruder(mu_mpc_unknownA, own_mav))
-            predicted_As.append(mu_mpc_unknownA[-1])
-            std_As.append(np.sqrt(sigma_mpc_unknownA[-1, -1]))
-            error = np.linalg.norm(true_poses[j+1] - mht.get_position_of_intruder(mu_mpc_unknownA, own_mav))
-            pose_errors.append(error)
-            pose_normalized_errors.append(error / true_distance[j+1])
-            dist_with_errors.append(true_distance[j+1])
         # Filter candidates
-        if 15 < j and j < 60:
+        if j > 40:
             intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1, 1)
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
@@ -156,42 +116,19 @@ for i in tqdm(range(num_scenarios)):
         # print(A, intruders_dict[A][4])
     sorted_idx = np.argsort(np.array(highest_counter_list))[::-1]
     ordered_candidates = np.array(list(intruders_dict.keys())[1:])[sorted_idx]
-    # predicted_A = ordered_candidates[0]
-    pred_As_scenario.append(mu_mpc_unknownA[-1])
+    predicted_A = ordered_candidates[0]
+    predicted_As.append(predicted_A)
 
-    # predicted_As.append(predicted_A)
-
-    
+    true_poses = [mav_states[i][:2] + np.array([np.cos(bearings[i] + mav_states[i][2]), np.sin(bearings[i] + mav_states[i][2])]) * true_distance[i] for i in range(len(bearings))]
     true_poses = np.array(true_poses)
 
     
-    last_pose_errors.append(np.linalg.norm(true_poses[-1] - est_intruder_poses[-2]))
+    last_pose_errors.append(np.linalg.norm(true_poses[-1] - est_intruder_poses[-1]))
     adj_error = last_pose_errors[-1] / true_distance[-1]
     last_pose_errors_adj.append(adj_error)
 
-    aircraft = 'Bombardier CRJ'
-    fig0 = plt.figure(0)
-    # plt.plot(dist_with_errors, pose_errors, alpha=0.2)
-    plt.plot(pose_errors, alpha=0.2)
-    plt.xlabel('Time Step')
-    plt.ylabel('Pose Error (m)')
-    plt.title(aircraft + ' Pose Error')
-
-    fig_neg1 = plt.figure(-1)
-    # plt.plot(dist_with_errors, pose_normalized_errors, alpha=0.2)
-    plt.plot(pose_normalized_errors, alpha=0.2)
-    plt.xlabel('Time Step')
-    plt.ylabel('Normalized Pose Error')
-    plt.title(aircraft + ' Normalized Pose Error')
-
-    # print(predicted_As[-1])
-    # plt.plot([true_A]*(len(predicted_As)), 'r--', label='True A', alpha=0.5)
-    # plt.plot(predicted_As, 'b-', label='Predicted A', alpha=0.5)
-    # plt.plot(np.array(predicted_As) + 3*np.array(std_As), 'g--', label='Predicted A + std', alpha=0.5)
-    # plt.plot(np.array(predicted_As) - 3*np.array(std_As), 'g--', label='Predicted A - std', alpha=0.5)
-    # plt.show()
-    # # if np.abs(true_A - predicted_A) > 5:
-    if pose_normalized_errors[-1] > 0.05:
+    # if np.abs(true_A - predicted_A) > 5:
+    if adj_error > 0.1:
         tqdm.write(f"Own Vel {own_vels[i]}")
         tqdm.write(f"True A {true_A}")
         tqdm.write(f"Intruder Vel {intruder_vel}")
@@ -209,7 +146,7 @@ for i in tqdm(range(num_scenarios)):
         plt.plot(np.array(est_intruder_poses)[:, 1], np.array(est_intruder_poses)[:, 0], 'ro', label='Estimated Intruder Position', markersize=5)
         plt.xlabel('X Position (m)')
         plt.ylabel('Y Position (m)')
-        plt.title(f'Estimated vs True Intruder Position (A={mu_mpc_unknownA[-1]:.2f}, True A={true_A:.2f})')
+        plt.title(f'Estimated vs True Intruder Position (A={predicted_A})')
         plt.axis('equal')
         plt.legend()
         plt.tight_layout()
@@ -279,7 +216,7 @@ for i in tqdm(range(num_scenarios)):
 
 plt.figure(len(all_bearings) + 1)
 plt.subplot(311)
-plt.bar(np.arange(num_scenarios), np.abs(np.array(true_As_vels)[:,0] - np.array(pred_As_scenario)))
+plt.bar(np.arange(num_scenarios), np.abs(np.array(true_As_vels)[:,0] - np.array(predicted_As)))
 plt.xlabel('Simulation Iteration')
 plt.ylabel('Error of true A')
 plt.title("Error of true A Plot")
@@ -300,16 +237,13 @@ plt.ylabel('Last Pose Error Adjusted (m/m)')
 plt.tight_layout()
 plt.show()
 
-# plt.figure(len(all_bearings) + 2)
-# plt.plot(scenario_true_As_min_dist, 'r-', label='Min $D^2$ A')
-# plt.plot(scenario_true_As_voting, 'y-', label='Voting A')
-# plt.plot(np.ones(len(scenario_true_As_min_dist))*np.array(true_As_vels)[:,0], 'b-', label='True A')
-# plt.xlabel('Simulation Iteration')
-# plt.ylabel('A (m)')
-# plt.title('Predicted A vs True A')
-# plt.legend()
-# plt.tight_layout()
-# plt.show()
-
-fig0.savefig('pose_error_over_time.png', dpi=300)
-fig_neg1.savefig('normalized_pose_error_over_time.png', dpi=300)
+plt.figure(len(all_bearings) + 2)
+plt.plot(scenario_true_As_min_dist, 'r-', label='Min $D^2$ A')
+plt.plot(scenario_true_As_voting, 'y-', label='Voting A')
+plt.plot(np.ones(len(scenario_true_As_min_dist))*np.array(true_As_vels)[:,0], 'b-', label='True A')
+plt.xlabel('Simulation Iteration')
+plt.ylabel('A (m)')
+plt.title('Predicted A vs True A')
+plt.legend()
+plt.tight_layout()
+plt.show()
