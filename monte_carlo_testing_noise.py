@@ -9,11 +9,14 @@ num_scenarios = 1
 num_frames = 500
 plotting = False
 
+bearing_std = np.radians(0.04)
+pixel_size_std = 3*(2*np.pi/8192)
+
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 50)
+range_A = np.linspace(min_A, max_A, 5)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
@@ -36,14 +39,19 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = np.diag(np.array([np.radians(0.001), 1e-5, np.radians(0.001), 1e-5]))**2
-    R_inverse_distance = np.diag(np.array([np.radians(0.04), np.radians(0.14)]))**2   
+    Q_inverse_distance = np.diag(np.array([np.radians(0.00001), 1e-5, np.radians(0.00001), 1e-5]))**2
+    # R_inverse_distance = 2*np.diag(np.array([np.radians(0.04), np.radians(0.14)]))**2
+    R_inverse_distance = np.diag(np.array([bearing_std, pixel_size_std]))**2
 
-    Q_tmp = np.eye(2)*1e-5**2
+    # For R tuning analysis
+    innovations_list = []
+    S_matrices_list = []
+
+    Q_tmp = np.eye(2)*0.001**2
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    R_nearly_constant_accel = np.diag(np.array([0.1, 0.1]))**2
+    R_nearly_constant_accel = np.diag(np.array([0.001, 0.001]))**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 
@@ -61,7 +69,7 @@ for i in tqdm(range(num_scenarios)):
         # vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
         mu_nearly_constant_accel = np.array([int_x, int_y, 0, 0, 0, 0])
-        sigma_nearly_constant_accel = np.eye(6)*0.1**2
+        sigma_nearly_constant_accel = np.eye(6)*10**2
         filter_counter = 0
         intruders_dict[k] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy(), filter_counter]
 
@@ -72,8 +80,8 @@ for i in tqdm(range(num_scenarios)):
     inv_distances = {i:[] for i in range_A}
 
     for j in range(len(bearings) - 1):
-        bearing = bearings[j+1] + np.random.normal(0, np.radians(0.04))
-        pixel_size = pixel_sizes[j+1] + np.random.normal(0, np.radians(0.12))
+        bearing = bearings[j+1] + np.random.normal(0, bearing_std)
+        pixel_size = pixel_sizes[j+1] + np.random.normal(0, pixel_size_std)
         u = us[j+1]
         own_mav = mav_states[j+1]
 
@@ -235,7 +243,6 @@ plt.title("Last Pose Error Adjusted Plot")
 plt.xlabel('Simulation Iteration')
 plt.ylabel('Last Pose Error Adjusted (m/m)')
 plt.tight_layout()
-plt.show()
 
 plt.figure(len(all_bearings) + 2)
 plt.plot(scenario_true_As_min_dist, 'r-', label='Min $D^2$ A')
@@ -246,4 +253,5 @@ plt.ylabel('A (m)')
 plt.title('Predicted A vs True A')
 plt.legend()
 plt.tight_layout()
+
 plt.show()

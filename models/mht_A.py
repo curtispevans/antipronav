@@ -155,14 +155,15 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         #     x = np.linspace(5, 40, 100)
         #     y = gradient*(x - A) + D2
 
-        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
+        # D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
+        D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
         mah_dists.append(D2)
           
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
     plt.figure(-2)
-    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.5)
+    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
     # plt.plot(x, y, 'g-', alpha=0.5)
     plt.xlabel('Candidate A')
     plt.ylabel('Mahalanobis distance')
@@ -257,7 +258,6 @@ def get_mahalanobis_distance_intruder_state(state, sigma, measurement, R, print_
     innovation = measurement - hx
     
     S = C @ sigma @ C.T + R
-    
     D2 = innovation.T @ np.linalg.inv(S) @ innovation
 
     # if print_inno:
@@ -282,4 +282,14 @@ def get_mu_sigma_from_mosted_voted_A(intruders_dict):
     return mu, sigma, most_voted_A
 
 
+def get_mahalanobis_distance_intruder_state_normalized(state, sigma, measurement, R, inverse_dist):
+    C = np.array([[1, 0, 0, 0, 0, 0],
+                  [0, 1, 0, 0, 0, 0]])
+    hx = C @ state
+    innovation = inverse_dist*(measurement - hx)
+
+    S = C @ sigma @ C.T + R
+    D2 = innovation.T @ np.linalg.inv(S) @ innovation
+
+    return D2
 
