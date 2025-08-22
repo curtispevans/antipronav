@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 50
+num_frames = 100
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
@@ -86,7 +86,7 @@ for i in tqdm(range(num_scenarios)):
         intruders_dict = mht.propagate_candidates_intruder_pos(intruders_dict, own_mav, Ts, Q_nearly_constant_accel, R_nearly_constant_accel)
 
         # Filter candidates
-        if j > 40:
+        if j >= 30:
             intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1, 1)
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)

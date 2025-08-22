@@ -155,10 +155,13 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         #     x = np.linspace(5, 40, 100)
         #     y = gradient*(x - A) + D2
 
-        # D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
-        D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
+        
+        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
+        # D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
         mah_dists.append(D2)
-          
+
+        if 10 <= A <= 12:
+            print(A, D2)
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
