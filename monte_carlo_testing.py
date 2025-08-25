@@ -6,14 +6,14 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 100
+num_frames = 300
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 50)
+range_A = np.linspace(min_A, max_A, 3)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
@@ -87,7 +87,7 @@ for i in tqdm(range(num_scenarios)):
 
         # Filter candidates
         if j >= 30:
-            intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_nearly_constant_accel, 1, 1)
+            intruders_dict = mht.filter_pose_measurement_probabilistic(intruders_dict, own_mav, R_inverse_distance, R_nearly_constant_accel, 1, 1, measurement)
             intruder_pose = mht.get_best_estimated_intruder_pose(intruders_dict)
             est_intruder_poses.append(intruder_pose)
             scenario_true_As_min_dist.append(intruders_dict['mah_dist_sorted'][0])

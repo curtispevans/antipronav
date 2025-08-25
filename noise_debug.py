@@ -8,7 +8,7 @@ Ts = 1/30
 num_scenarios = 1
 num_frames = 500
 plotting = False
-bearing_std = np.radians(0.04)
+bearing_std = np.radians(2*np.pi/8192)
 pixel_size_std = 3*(2*np.pi/8192)
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
@@ -35,19 +35,19 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = 1e-2*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
-    R_inverse_distance = 5*np.diag(np.array([bearing_std, pixel_size_std]))**2
+    Q_inverse_distance = 1*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
+    R_inverse_distance = 1*np.diag(np.array([bearing_std, pixel_size_std]))**2
     # R_inverse_distance = np.diag(np.array([np.radians(1e-4), np.radians(1e-4)]))**2
 
     # For R tuning analysis
     innovations_list = []
     S_matrices_list = []
 
-    Q_tmp = np.eye(2)*0.001**2
+    Q_tmp = np.eye(2)*0.0001**2
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    R_nearly_constant_accel = 5*np.diag(np.array([1, 1]))**2
+    R_nearly_constant_accel = 1*np.diag(np.array([1, 1]))**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 
@@ -65,7 +65,7 @@ for i in tqdm(range(num_scenarios)):
         # vel_y = relative_velocities[i][1] + own_velocities[i][1]
 
         mu_nearly_constant_accel = np.array([int_x, int_y, 0, 0, 0, 0])
-        sigma_nearly_constant_accel = np.eye(6)*1**2
+        sigma_nearly_constant_accel = np.eye(6)*10**2
         filter_counter = 0
         intruders_dict[k] = [mu_inverse_distance.copy(), sigma_inverse_distance.copy(), mu_nearly_constant_accel.copy(), sigma_nearly_constant_accel.copy(), filter_counter]
 
