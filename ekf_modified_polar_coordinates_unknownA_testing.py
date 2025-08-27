@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from models.ekf_modified_polar_coordinates_unknownA import kalman_update
 from models.mav_dynamics import MavDynamics
+from monte_carlo_simulations import get_simulated_data
 
 def get_own_pose_and_intruder_pose(mav1, distance, bearing):
     # Get the position of the intruder
@@ -23,23 +24,39 @@ def get_all_own_poses_and_intruder_poses(mav1_list, distances, bearings):
         intruder_poses.append(intruder_pose)
     return mav1_poses, intruder_poses
 
-bearings = np.load('data/bearing.npy')
-pixel_sizes = np.load('data/pixel_sizes.npy')
-true_distance = np.load('data/distances.npy')
-control = np.load('data/control.npy')
-relative_velocities = np.load('data/relative_velocity.npy')
-own_velocities = np.load('data/own_velocity.npy')
-mav_states = np.load('data/mav_state.npy')
-us = np.load('data/us.npy')
+# bearings = np.load('data/bearing.npy')
+# pixel_sizes = np.load('data/pixel_sizes.npy')
+# true_distance = np.load('data/distances.npy')
+# control = np.load('data/control.npy')
+# relative_velocities = np.load('data/relative_velocity.npy')
+# own_velocities = np.load('data/own_velocity.npy')
+# mav_states = np.load('data/mav_state.npy')
+# us = np.load('data/us.npy')
 
 Ts = 1/30
-A = 16
+num_scenarios = 1
+num_frames = 300
+plotting = False
+
+bearing_std = np.radians(2*np.pi/8192)
+pixel_size_std = 3*(2*np.pi/8192)
+
+all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
+bearings = all_bearings[0]
+mav_states = all_mav_states[0]
+pixel_sizes = all_pixel_sizes[0]
+true_distance = all_true_distance[0]
+us = all_us[0]
+
+
+A = 21
 
 mu = np.array([0, 0, bearings[0], 1/true_distance[0], A])
-sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 0.01, 0.001]))**2
+sigma = np.diag(np.array([np.radians(0.1), 0.0001, np.radians(0.1), 1, 1]))**2
 
-Q = np.diag(np.array([np.radians(0.01), 1e-9, np.radians(0.01), 1e-9, 1e-9]))**2
-R = np.diag(np.array([np.radians(0.00001), 1e-15]))**2
+Q = 1*np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5, 1e-7]))**2
+# R = np.diag(np.array([np.radians(0.00001), 1e-15]))**2
+R = 5*np.diag(np.array([bearing_std, pixel_size_std]))**2
 
 est_dist = []
 est_bearing = []
@@ -54,7 +71,7 @@ std_A = []
 est_A = []
 
 for bearing, pixel_size, own_mav, u in zip(bearings[1:], pixel_sizes[1:], mav_states[1:], us[1:]):
-    measurement = np.array([bearing, pixel_size])
+    measurement = np.array([bearing + np.random.normal(0, bearing_std), pixel_size + np.random.normal(0, pixel_size_std)])
     # measurement = np.array([bearing, pixel_size])
     mu, sigma = kalman_update(mu, sigma, own_mav, u, measurement, Q, R, Ts)
     # print(np.linalg.norm(mu[:2]))
@@ -88,7 +105,7 @@ plt.title('Bearing between Mavs')
 
 
 plt.subplot(223)
-plt.plot(1/true_distance, label='True inverse distance')
+plt.plot(1/np.array(true_distance), label='True inverse distance')
 plt.plot(est_dist, label='Estimated inverse distance')
 plt.xlabel('Time')
 plt.ylabel('Inverse Distance')

@@ -31,6 +31,7 @@ for i in tqdm(range(num_scenarios)):
     true_distance = all_true_distance[i]
     us = all_us[i]
     true_A, intruder_vel = true_As_vels[i]
+    print(true_A)
 
     est_intruder_poses = []
 
