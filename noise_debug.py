@@ -35,7 +35,7 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = 1*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
+    Q_inverse_distance = 1e-2*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
     R_inverse_distance = 1*np.diag(np.array([bearing_std, pixel_size_std]))**2
     # R_inverse_distance = np.diag(np.array([np.radians(1e-4), np.radians(1e-4)]))**2
 

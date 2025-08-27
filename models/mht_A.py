@@ -36,7 +36,7 @@ def propagate_candidates_intruder_pos(intruders_dict, mav, Ts, Q, R):
         intruder_sigma = intruders_dict[A][3]
         # Get the position of the intruder
         measurement_pos = get_position_of_intruder(state, mav)
-
+        # print(f'{np.round(A, 2)} vel: {np.round(np.linalg.norm(intruder_state[2:4]), 2)} m/s, g-force: {np.round(np.linalg.norm(intruder_state[4:])/9.81, 2)} g')
         # update the intruder state with the measurement
         intruder_state, sigma = nearly_constant_accel_kf_update(intruder_state, intruder_sigma, measurement_pos, Q, R, Ts)
 
