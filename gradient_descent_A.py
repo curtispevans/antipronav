@@ -6,14 +6,14 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 50
+num_frames = 200
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
-initial_A = 10
+initial_A = 1
 eps = 1e-5
-eta = 1e-3
+eta = 1e-1
 
 bearings = all_bearings[0]
 pixel_sizes = all_pixel_sizes[0]
@@ -64,6 +64,10 @@ mus_sigmas_eps = [(mu_mpc_eps, sigma_mpc), (mu_nca_eps, sigma_nca_eps)]
 
 Ak = initial_A
 
+measurements = []
+mus_sigmas_list = []
+mus_sigmas_eps_list = []
+
 for i in tqdm(range(len(bearings) - 1)):
     bearing = bearings[i+1]
     pixel_size = pixel_sizes[i+1]
@@ -71,19 +75,41 @@ for i in tqdm(range(len(bearings) - 1)):
     mav_state = mav_states[i+1]
 
     measurement = np.array([bearing, pixel_size])
+    measurements.append(measurement)
 
     mus_sigmas_k1, D2_Ak = gbu.update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav_state, u, Ak)
+    mus_sigmas_list.append(mus_sigmas_k1)
 
     Ak_eps = Ak + eps
 
     mus_sigmas_eps, D2_Ak_eps = gbu.update_all_filters(mus_sigmas_eps, Qs_Rs, measurement, Ts, mav_state, u, Ak_eps)
+    mus_sigmas_eps_list.append(mus_sigmas_eps)
 
     
     gradient = (D2_Ak_eps - D2_Ak)/eps
 
-    print(D2_Ak_eps, D2_Ak, gradient)
+    # print(Ak, D2_Ak_eps, D2_Ak, gradient)
 
     mus_sigmas = mus_sigmas_k1.copy()
+
+    window = 15
+    if i > 30:
+        if i % window == 0:
+            update_window = 60
+            print('step', len(measurements))
+            Ak = Ak - eta * gradient
+            Ak_eps = Ak + eps
+
+            mus_sigmas_init = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak)
+            mus_sigmas_init_eps = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak_eps)
+            # print('first Ak')
+            mus_sigmas_k1, D2s_k1 = gbu.update_new_filter(mus_sigmas_init, Qs_Rs, measurements, Ts, mav_states[:i+1], us[:i+1], Ak)
+            # print('first Ak_eps')
+            mus_sigmas_eps, D2s_eps = gbu.update_new_filter(mus_sigmas_init_eps, Qs_Rs, measurements, Ts, mav_states[:i+1], us[:i+1], Ak_eps)
+            # measurements.clear()
+            print((np.array(D2s_eps) - np.array(D2s_k1))/eps)
+            mus_sigmas = mus_sigmas_k1.copy()
+            mus_sigmas_eps = mus_sigmas_eps.copy()
 
     # print((D2_Ak_eps - D2_Ak) / eps)
     

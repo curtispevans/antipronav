@@ -63,3 +63,36 @@ def update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav, u, A):
     mus_sigmas_updated = [(mu_mpc, sigma_mpc), (mu_nca, sigma_nca)]
 
     return mus_sigmas_updated, D2
+
+def update_new_filter(init_mus_sigmas, Qs_Rs, measurements, Ts, mavs, us, A):
+    mus_sigmas = init_mus_sigmas.copy()
+    D2s = []
+
+    for i in range(len(measurements)-1):
+        # print(mavs)
+        measurement = measurements[i+1]
+        mav = mavs[i+1]
+        u = us[i+1]
+
+        mus_sigmas, D2 = update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav, u, A)
+        # print(D2)
+        D2s.append(D2)
+
+    return mus_sigmas, D2s
+
+def initialize_filters(bearing, pixel_size, mav_state, A):
+    mus_sigmas = []
+
+    # Initialize the modified polar coordinates filter
+    distance = A / pixel_size
+    mu_mpc = np.array([0, 0, bearing, 1/distance])
+    sigma_mpc = np.diag([np.radians(0.1), 0.001, np.radians(0.1), 0.01])**2
+    mus_sigmas.append((mu_mpc, sigma_mpc))
+
+    # Initialize the nearly constant acceleration filter
+    int_x, int_y = get_position_of_intruder(mu_mpc, mav_state)
+    mu_nca = np.array([int_x, int_y, 0, 0, 0, 0])
+    sigma_nca = np.eye(6)*1**2
+    mus_sigmas.append((mu_nca, sigma_nca))
+
+    return mus_sigmas
