@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 200
+num_frames = 100
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
@@ -88,17 +88,19 @@ for i in tqdm(range(len(bearings) - 1)):
     
     gradient = (D2_Ak_eps - D2_Ak)/eps
 
-    # print(Ak, D2_Ak_eps, D2_Ak, gradient)
+    print(Ak, D2_Ak_eps, D2_Ak, gradient)
 
     mus_sigmas = mus_sigmas_k1.copy()
 
-    window = 15
+    window = 1
     if i > 30:
         if i % window == 0:
             update_window = 60
-            print('step', len(measurements))
+            
             Ak = Ak - eta * gradient
             Ak_eps = Ak + eps
+
+            print(Ak, 'step', len(measurements))
 
             mus_sigmas_init = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak)
             mus_sigmas_init_eps = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak_eps)
