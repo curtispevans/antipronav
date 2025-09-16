@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 100
+num_frames = 40
 plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
@@ -77,41 +77,50 @@ for i in tqdm(range(len(bearings) - 1)):
     measurement = np.array([bearing, pixel_size])
     measurements.append(measurement)
 
-    mus_sigmas_k1, D2_Ak = gbu.update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav_state, u, Ak)
-    mus_sigmas_list.append(mus_sigmas_k1)
+    
+    mus_sigmas, D2_Ak = gbu.update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav_state, u, Ak)
+    mus_sigmas_list.append(mus_sigmas)
+    # print(D2_Ak)
 
     Ak_eps = Ak + eps
 
     mus_sigmas_eps, D2_Ak_eps = gbu.update_all_filters(mus_sigmas_eps, Qs_Rs, measurement, Ts, mav_state, u, Ak_eps)
     mus_sigmas_eps_list.append(mus_sigmas_eps)
+    # print(D2_Ak_eps)
 
     
     gradient = (D2_Ak_eps - D2_Ak)/eps
 
     print(Ak, D2_Ak_eps, D2_Ak, gradient)
 
-    mus_sigmas = mus_sigmas_k1.copy()
+    # mus_sigmas = mus_sigmas_k1.copy()
 
     window = 1
-    if i > 30:
+    if i >= 30:
         if i % window == 0:
             update_window = 60
+            
             
             Ak = Ak - eta * gradient
             Ak_eps = Ak + eps
 
-            print(Ak, 'step', len(measurements))
-
+            # print(Ak, 'step', len(measurements), len(mav_states[1:i+1]), len(us[1:i+1]))
+        
             mus_sigmas_init = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak)
             mus_sigmas_init_eps = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[0], Ak_eps)
             # print('first Ak')
-            mus_sigmas_k1, D2s_k1 = gbu.update_new_filter(mus_sigmas_init, Qs_Rs, measurements, Ts, mav_states[:i+1], us[:i+1], Ak)
+            mus_sigmas, D2s_k1 = gbu.update_new_filter(mus_sigmas_init, Qs_Rs, measurements, Ts, mav_states[1:i+2], us[1:i+2], Ak)
             # print('first Ak_eps')
-            mus_sigmas_eps, D2s_eps = gbu.update_new_filter(mus_sigmas_init_eps, Qs_Rs, measurements, Ts, mav_states[:i+1], us[:i+1], Ak_eps)
+            mus_sigmas_eps, D2s_eps = gbu.update_new_filter(mus_sigmas_init_eps, Qs_Rs, measurements, Ts, mav_states[1:i+2], us[1:i+2], Ak_eps)
             # measurements.clear()
-            print((np.array(D2s_eps) - np.array(D2s_k1))/eps)
-            mus_sigmas = mus_sigmas_k1.copy()
-            mus_sigmas_eps = mus_sigmas_eps.copy()
+            grad = (np.array(D2s_eps) - np.array(D2s_k1))/eps
+            # print(grad)
+            # gradient = grad[-1]
+            # mus_sigmas = mus_sigmas_k1.copy()
+            # mus_sigmas_eps = mus_sigmas_eps.copy()
+            # print('updated', D2s_k1[-1], D2s_eps[-1], grad[-1])
+            # print('updated', measurements[-1])
+
 
     # print((D2_Ak_eps - D2_Ak) / eps)
     

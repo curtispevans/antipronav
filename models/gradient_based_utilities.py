@@ -68,11 +68,11 @@ def update_new_filter(init_mus_sigmas, Qs_Rs, measurements, Ts, mavs, us, A):
     mus_sigmas = init_mus_sigmas.copy()
     D2s = []
 
-    for i in range(len(measurements)-1):
+    for i in range(len(measurements)):
         # print(mavs)
-        measurement = measurements[i+1]
-        mav = mavs[i+1]
-        u = us[i+1]
+        measurement = measurements[i]
+        mav = mavs[i]
+        u = us[i]
 
         mus_sigmas, D2 = update_all_filters(mus_sigmas, Qs_Rs, measurement, Ts, mav, u, A)
         # print(D2)
