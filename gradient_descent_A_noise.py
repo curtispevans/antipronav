@@ -6,15 +6,15 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 500
+num_frames = 300
 plotting = False
 
-bearing_std = (2*np.pi/8192)*0.5
+bearing_std = (2*np.pi/8192)*1
 pixel_size_std = (2*np.pi/8192)*1
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
-initial_A = 10
+initial_A = 15
 eps = 1e-5
 eta = 1e-1
 tol = 1e-3
@@ -28,14 +28,14 @@ true_As_vels = true_As_vels[0]
 own_vels = own_vels[0]
 
 
-Q_mpc = 1*np.diag(np.array([np.radians(0.01), 1e-5, np.radians(0.01), 1e-5]))**2
-R_mpc = np.diag(np.array([np.radians(0.0001), np.radians(0.0001)]))**2  
+Q_mpc = 1e-4*np.diag(np.array([np.radians(0.01), 1e-3, np.radians(0.01), 1e-5]))**2
+R_mpc = 5*np.diag(np.array([bearing_std, pixel_size_std]))**2  
 
-Q_tmp = np.eye(2)*0.01**2
+Q_tmp = np.eye(2)*0.1**2
 Q_nca = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-R_nca = np.diag(np.array([1e-5, 1e-5]))**2
+R_nca = np.diag(np.array([1, 1]))*50**2
 
 Ak = initial_A
 Ak_eps = Ak + eps
@@ -50,7 +50,7 @@ measurements = []
 
 for i in tqdm(range(len(bearings) - 1)):
     bearing = bearings[i+1] + np.random.normal(0, bearing_std)
-    pixel_size = pixel_sizes[i+1] + np.random.normal(0, pixel_size_std)
+    pixel_size = pixel_sizes[i+1] # + np.random.normal(0, pixel_size_std)
     u = us[i+1]
     mav_state = mav_states[i+1]
 
@@ -69,7 +69,7 @@ for i in tqdm(range(len(bearings) - 1)):
 
     window = 1
     diff = np.abs(Ak - (Ak - eta * gradient))
-    if i >= 60:# and diff > tol:
+    if i >= 150:# and diff > tol:
         Ak = Ak - eta * gradient
         Ak_eps = Ak + eps
     

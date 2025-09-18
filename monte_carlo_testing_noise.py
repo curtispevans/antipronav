@@ -39,9 +39,9 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = 1e-4*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
+    Q_inverse_distance = 1e-4*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-5]))**2
     # R_inverse_distance = 2*np.diag(np.array([np.radians(0.04), np.radians(0.14)]))**2
-    R_inverse_distance = 50*np.diag(np.array([bearing_std, pixel_size_std]))**2
+    R_inverse_distance = 5*np.diag(np.array([bearing_std, pixel_size_std]))**2
 
     # For R tuning analysis
     innovations_list = []
@@ -51,7 +51,7 @@ for i in tqdm(range(num_scenarios)):
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    R_nearly_constant_accel = np.diag(np.array([1, 1]))*10**2
+    R_nearly_constant_accel = np.diag(np.array([1, 1]))*50**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 
