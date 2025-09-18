@@ -164,8 +164,8 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R_inv, R_nca, mah
         # print(A, '\n', np.round(intruder_sigma, 5))
         mah_dists.append(D2)
 
-        if 10 <= A <= 12:
-            print(A, D2)
+        # if 10 <= A <= 12:
+        #     print(A, D2)
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]

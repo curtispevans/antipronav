@@ -50,7 +50,7 @@ measurements = []
 
 for i in tqdm(range(len(bearings) - 1)):
     bearing = bearings[i+1] + np.random.normal(0, bearing_std)
-    pixel_size = pixel_sizes[i+1] #+ np.random.normal(0, pixel_size_std)
+    pixel_size = pixel_sizes[i+1] + np.random.normal(0, pixel_size_std)
     u = us[i+1]
     mav_state = mav_states[i+1]
 
