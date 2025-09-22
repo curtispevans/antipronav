@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 500
+num_frames = 300
 plotting = False
 bearing_std = np.radians(2*np.pi/8192)
 pixel_size_std = 3*(2*np.pi/8192)
@@ -35,7 +35,7 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = 1e-2*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
+    Q_inverse_distance = 1*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
     R_inverse_distance = 1*np.diag(np.array([bearing_std, pixel_size_std]))**2
     # R_inverse_distance = np.diag(np.array([np.radians(1e-4), np.radians(1e-4)]))**2
 
@@ -43,11 +43,11 @@ for i in tqdm(range(num_scenarios)):
     innovations_list = []
     S_matrices_list = []
 
-    Q_tmp = np.eye(2)*0.0001**2
+    Q_tmp = np.eye(2)*0.1**2
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    R_nearly_constant_accel = 1*np.diag(np.array([1, 1]))**2
+    R_nearly_constant_accel = np.diag(np.array([1, 1]))*1**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 

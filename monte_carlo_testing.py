@@ -13,7 +13,7 @@ all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_A
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 3)
+range_A = np.linspace(min_A, max_A, 30)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []

@@ -9,9 +9,6 @@ num_scenarios = 1
 num_frames = 500
 plotting = False
 
-bearing_std = (2*np.pi/8192)*0.5
-pixel_size_std = (2*np.pi/8192)*1
-
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
 initial_A = 10
@@ -49,8 +46,8 @@ mus_sigmas_eps = gbu.initialize_filters(bearings[0], pixel_sizes[0], mav_states[
 measurements = []
 
 for i in tqdm(range(len(bearings) - 1)):
-    bearing = bearings[i+1] + np.random.normal(0, bearing_std)
-    pixel_size = pixel_sizes[i+1] #+ np.random.normal(0, pixel_size_std)
+    bearing = bearings[i+1] 
+    pixel_size = pixel_sizes[i+1] 
     u = us[i+1]
     mav_state = mav_states[i+1]
 
@@ -69,7 +66,7 @@ for i in tqdm(range(len(bearings) - 1)):
 
     window = 1
     diff = np.abs(Ak - (Ak - eta * gradient))
-    if i >= 60:# and diff > tol:
+    if i >= 60 and diff > tol:
         Ak = Ak - eta * gradient
         Ak_eps = Ak + eps
     

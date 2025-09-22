@@ -160,7 +160,7 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R_inv, R_nca, mah
         # print(A)
         D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R_nca, print_inno)
         D2 += get_mahalanobis_distance_pixel_size(state, sigma, measurement, R_inv, A)
-        # D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
+        # D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R_nca, state[-1])
         # print(A, '\n', np.round(intruder_sigma, 5))
         mah_dists.append(D2)
 
@@ -293,7 +293,7 @@ def get_mahalanobis_distance_intruder_state_normalized(state, sigma, measurement
     C = np.array([[1, 0, 0, 0, 0, 0],
                   [0, 1, 0, 0, 0, 0]])
     hx = C @ state
-    innovation = (inverse_dist**1.1)*(measurement - hx)
+    innovation = (inverse_dist**2)*(measurement - hx)
 
     S = C @ sigma @ C.T + R
     D2 = innovation.T @ np.linalg.inv(S) @ innovation

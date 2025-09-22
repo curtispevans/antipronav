@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
+from models.noise import add_simple_adaptive_noise, get_adaptive_R
 
 Ts = 1/30
 num_scenarios = 1
@@ -16,7 +17,7 @@ all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_A
 min_A = 5
 max_A = 40
 
-range_A = np.linspace(min_A, max_A, 20)
+range_A = np.linspace(min_A, max_A, 50)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
@@ -39,9 +40,9 @@ for i in tqdm(range(num_scenarios)):
 
     mu_inverse_distance = np.array([0, 0, bearings[0], 1/true_distance[0]])
     sigma_inverse_distance = np.diag(np.array([np.radians(0.1), 0.001, np.radians(0.1), 0.01]))**2
-    Q_inverse_distance = 1e-4*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-5]))**2
+    Q_inverse_distance = 1*np.diag(np.array([np.radians(0.001), 1e-3, np.radians(0.001), 1e-3]))**2
     # R_inverse_distance = 2*np.diag(np.array([np.radians(0.04), np.radians(0.14)]))**2
-    R_inverse_distance = 5*np.diag(np.array([bearing_std, pixel_size_std]))**2
+    R_inverse_distance = 1*np.diag(np.array([bearing_std, pixel_size_std]))**2
 
     # For R tuning analysis
     innovations_list = []
@@ -51,7 +52,7 @@ for i in tqdm(range(num_scenarios)):
     Q_nearly_constant_accel = np.block([[Ts**5/20*Q_tmp, Ts**4/8*Q_tmp, Ts**3/6*Q_tmp],
                                         [Ts**4/8*Q_tmp, Ts**3/3*Q_tmp, Ts**2/2*Q_tmp],
                                         [Ts**3/6*Q_tmp, Ts**2/2*Q_tmp, Ts*Q_tmp]]) 
-    R_nearly_constant_accel = np.diag(np.array([1, 1]))*50**2
+    R_nearly_constant_accel = np.diag(np.array([1, 1]))*1**2
 
     intruders_dict = {'mah_dist_sorted':[]}
 
@@ -80,12 +81,16 @@ for i in tqdm(range(num_scenarios)):
     inv_distances = {i:[] for i in range_A}
 
     for j in range(len(bearings) - 1):
-        bearing = bearings[j+1] + np.random.normal(0, bearing_std)
-        pixel_size = pixel_sizes[j+1] + np.random.normal(0, pixel_size_std)
+        bearing = bearings[j+1] 
+        pixel_size = pixel_sizes[j+1] 
+        true_range = true_distance[j+1]
         u = us[j+1]
         own_mav = mav_states[j+1]
-
-        measurement = np.array([bearing, pixel_size])
+        bearing_noise = bearing + np.random.normal(0, bearing_std)
+        pixel_size_noise = pixel_size + np.random.normal(0, pixel_size_std)
+        # bearing_noise, pixel_size_noise = add_simple_adaptive_noise(bearing, pixel_size, true_range, difficulty="easy", far_range=5000)
+        # R_inverse_distance = get_adaptive_R(1/true_range, difficulty="easy", far_range=5000)
+        measurement = np.array([bearing_noise, pixel_size_noise])
         
         # Propagate candidates for inverse distance
         intruders_dict = mht.propagate_candidates_inverse_distance(intruders_dict, own_mav, u, measurement, Ts, Q_inverse_distance, R_inverse_distance)
