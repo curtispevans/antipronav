@@ -7,7 +7,7 @@ from models.noise import add_simple_adaptive_noise, get_adaptive_R
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 500
+num_frames = 200
 plotting = False
 
 bearing_std = 2*np.pi/8192

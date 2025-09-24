@@ -6,10 +6,10 @@ from tqdm import tqdm
 
 Ts = 1/30
 num_scenarios = 1
-num_frames = 300
+num_frames = 500
 plotting = False
 bearing_std = np.radians(2*np.pi/8192)
-pixel_size_std = 3*(2*np.pi/8192)
+pixel_size_std = 1*(2*np.pi/8192)
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 min_A = 2

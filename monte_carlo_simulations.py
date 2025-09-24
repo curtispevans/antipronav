@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 from models.mav_dynamics import MavDynamics
 from IPython.core.debugger import set_trace
 
-# np.random.seed(42)  # For reproducibility
+np.random.seed(42)  # For reproducibility
 # np.random.seed(13)
 # np.random.seed(8)
-np.random.seed(5)
+# np.random.seed(5)
+
+
 
 def get_random_ownship_start_pose(x_min, x_max, y_min, y_max):
     start_pose_x = np.random.uniform(x_min, x_max)
@@ -28,8 +30,8 @@ def get_random_intruder(ownship : MavDynamics, intruder_velocity) -> MavDynamics
     # intruder_pose = ownship_pose + np.random.uniform(-1000, 1000, size=2)
     # intruder_velocity = np.random.uniform(30, 100)
     # intruder_heading = np.random.uniform(-np.pi, np.pi)
-    # intruder = MavDynamics([*intruder_start_pose, intruder_heading, intruder_velocity], ownship.Ts)
-    intruder = MavDynamics([100, -100, np.pi/2, intruder_velocity], ownship.Ts)
+    intruder = MavDynamics([*intruder_start_pose, intruder_heading, intruder_velocity], ownship.Ts)
+    # intruder = MavDynamics([300, -300, np.pi/2, intruder_velocity], ownship.Ts)
     return intruder
 
 
@@ -62,10 +64,11 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
         ownship_velocities.append(ownship_velocity)
         ownship = MavDynamics([*ownship_start_pose, ownship_heading, ownship_velocity], Ts)
         u = 0.052 + 0*np.random.uniform(-0.7, 0.7)  # Random control input for the ownship
+        # u = 0
         # 2 gets cessna, -3 gets baron, -1 Beechcraft King Air, 13 gets boeing 757, 3 gets Cirrus, 0 gets bombardier
-        A, intruder_velocity = wingspan_cruise_speed[0 + 0*np.random.choice(np.arange(len(wingspan_cruise_speed)))]
-        A = 7
-        intruder_velocity = 30
+        A, intruder_velocity = wingspan_cruise_speed[0 + np.random.choice(np.arange(len(wingspan_cruise_speed)))]
+        # A = 7
+        # intruder_velocity = 30
         mav2 = get_random_intruder(ownship, intruder_velocity)
         
         current_scenario_bearings = []

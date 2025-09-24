@@ -13,7 +13,7 @@ all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_A
 
 initial_A = 10
 eps = 1e-5
-eta = 1e-1
+eta = 1e-2
 tol = 1e-3
 
 bearings = all_bearings[0]
