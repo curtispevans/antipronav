@@ -28,7 +28,8 @@ def get_random_intruder(ownship : MavDynamics, intruder_velocity) -> MavDynamics
     # intruder_pose = ownship_pose + np.random.uniform(-1000, 1000, size=2)
     # intruder_velocity = np.random.uniform(30, 100)
     # intruder_heading = np.random.uniform(-np.pi, np.pi)
-    intruder = MavDynamics([*intruder_start_pose, intruder_heading, intruder_velocity], ownship.Ts)
+    # intruder = MavDynamics([*intruder_start_pose, intruder_heading, intruder_velocity], ownship.Ts)
+    intruder = MavDynamics([100, -100, np.pi/2, intruder_velocity], ownship.Ts)
     return intruder
 
 
@@ -63,6 +64,8 @@ def get_simulated_data(Ts, num_scenarios, num_frames, plot_scenarios=False):
         u = 0.052 + 0*np.random.uniform(-0.7, 0.7)  # Random control input for the ownship
         # 2 gets cessna, -3 gets baron, -1 Beechcraft King Air, 13 gets boeing 757, 3 gets Cirrus, 0 gets bombardier
         A, intruder_velocity = wingspan_cruise_speed[0 + 0*np.random.choice(np.arange(len(wingspan_cruise_speed)))]
+        A = 7
+        intruder_velocity = 30
         mav2 = get_random_intruder(ownship, intruder_velocity)
         
         current_scenario_bearings = []

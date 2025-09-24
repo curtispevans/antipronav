@@ -14,10 +14,10 @@ bearing_std = 2*np.pi/8192
 pixel_size_std = 3*(2*np.pi/8192)
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
-min_A = 5
-max_A = 40
+min_A = 2
+max_A = 10
 
-range_A = np.linspace(min_A, max_A, 50)
+range_A = np.linspace(min_A, max_A, 3)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
