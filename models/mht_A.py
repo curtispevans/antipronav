@@ -55,7 +55,8 @@ def propagate_candidates_inverse_distance(intruders_dict, mav, u, measurement, T
 
         # Update the state using the EKF
         R_tmp = R.copy()
-        # R_tmp[1,1] = A * R[1,1]
+        # R_tmp[-1,-1] = state[-1]**-1 * R_tmp[-1,-1]  # Scale R based on inverse distance
+        R_tmp = state[-1]**-1 * R_tmp  # Scale R based on inverse distance
         state, sigma = ekf_modified_polar_knownA_update(state, sigma, mav, u, measurement, Q, R_tmp, Ts, A)
 
         intruders_dict[A][0] = state

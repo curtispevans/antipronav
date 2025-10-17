@@ -76,8 +76,9 @@ for i in tqdm(range(num_scenarios)):
     inv_distances = {i:[] for i in range_A}
 
     for j in range(len(bearings) - 1):
+        true_dist = true_distance[j+1]
         bearing = bearings[j+1] + np.random.normal(0, bearing_std)
-        pixel_size = pixel_sizes[j+1] #+ np.random.normal(0, pixel_size_std)
+        pixel_size = pixel_sizes[j+1] + true_dist**(0.5)*np.random.normal(0, pixel_size_std)
         u = us[j+1]
         own_mav = mav_states[j+1]
 
