@@ -87,7 +87,7 @@ for i in tqdm(range(num_scenarios)):
         u = us[j+1]
         own_mav = mav_states[j+1]
         bearing_noise = bearing + np.random.normal(0, bearing_std)
-        pixel_size_noise = pixel_size + true_range**(0.5)*np.random.normal(0, pixel_size_std)
+        pixel_size_noise = pixel_size + true_range**(1)*np.random.normal(0, pixel_size_std)
         # bearing_noise, pixel_size_noise = add_simple_adaptive_noise(bearing, pixel_size, true_range, difficulty="easy", far_range=5000)
         # R_inverse_distance = get_adaptive_R(1/true_range, difficulty="easy", far_range=5000)
         measurement = np.array([bearing_noise, pixel_size_noise])
