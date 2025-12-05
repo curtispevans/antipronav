@@ -5,7 +5,7 @@ from monte_carlo_simulations import get_simulated_data
 from tqdm import tqdm
 
 Ts = 1/30
-num_scenarios = 1
+num_scenarios = 1000
 num_frames = 500
 plotting = False
 
@@ -169,20 +169,20 @@ for i in tqdm(range(num_scenarios)):
     adj_error = last_pose_errors[-1] / true_distance[-1]
     last_pose_errors_adj.append(adj_error)
 
-    aircraft = 'Bombardier CRJ'
+    aircraft = 'Cessna 172'
     fig0 = plt.figure(0)
     # plt.plot(dist_with_errors, pose_errors, alpha=0.2)
     plt.plot(pose_errors, alpha=0.2)
     plt.xlabel('Time Step')
-    plt.ylabel('Pose Error (m)')
-    plt.title(aircraft + ' Pose Error')
+    plt.ylabel('Position Error (m)')
+    plt.title(aircraft + ' Position Error')
 
     fig_neg1 = plt.figure(-1)
     # plt.plot(dist_with_errors, pose_normalized_errors, alpha=0.2)
     plt.plot(pose_normalized_errors, alpha=0.2)
     plt.xlabel('Time Step')
-    plt.ylabel('Normalized Pose Error')
-    plt.title(aircraft + ' Normalized Pose Error')
+    plt.ylabel('Normalized Position Error')
+    plt.title(aircraft + ' Normalized Position Error')
 
     # print(predicted_As[-1])
     # plt.plot([true_A]*(len(predicted_As)), 'r--', label='True A', alpha=0.5)
@@ -313,3 +313,6 @@ plt.show()
 
 fig0.savefig('pose_error_over_time.png', dpi=300)
 fig_neg1.savefig('normalized_pose_error_over_time.png', dpi=300)
+
+print(f'last pose errors average: {np.mean(last_pose_errors)}')
+print(f'last pose normalized average: {np.mean(last_pose_errors_adj)}')

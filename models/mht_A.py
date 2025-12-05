@@ -155,23 +155,23 @@ def filter_pose_measurement_probabilistic(intruders_dict, mav, R, mahalanobis_di
         #     x = np.linspace(5, 40, 100)
         #     y = gradient*(x - A) + D2
 
-        # D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
-        D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
+        D2 = get_mahalanobis_distance_intruder_state(intruder_state, intruder_sigma, measurement_pos, R, print_inno)
+        # D2 = get_mahalanobis_distance_intruder_state_normalized(intruder_state, intruder_sigma, measurement_pos, R, state[-1])
         mah_dists.append(D2)
           
 
         # if D2 < mahalanobis_dist:
         #     filtered_dict[A] = [state, sigma, intruder_state, intruder_sigma]
-    plt.figure(-2)
-    plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
-    # plt.plot(x, y, 'g-', alpha=0.5)
-    plt.xlabel('Candidate A')
-    plt.ylabel('Mahalanobis distance')
-    plt.title('Mahalanobis distances of candidates')
-    # plt.xlim(4, 40)
-    # plt.ylim(-0.01, 0.5)
-    plt.pause(0.01)       
-    # plt.show()
+    # plt.figure(-2)
+    # plt.plot(list(intruders_dict.keys())[1:], mah_dists, 'b-', label='Mahalanobis distances', alpha=0.05)
+    # # plt.plot(x, y, 'g-', alpha=0.5)
+    # plt.xlabel('Candidate A')
+    # plt.ylabel('Mahalanobis distance')
+    # plt.title('Mahalanobis distances of candidates')
+    # # plt.xlim(4, 40)
+    # # plt.ylim(-0.01, 0.5)
+    # plt.pause(0.01)       
+    # # plt.show()
 
 
     sorted_As = np.argsort(np.array(mah_dists))
