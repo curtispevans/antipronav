@@ -11,7 +11,7 @@ plotting = False
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
 
-initial_A = 10
+initial_A = 1
 eps = 1e-5
 eta = 1e-2
 tol = 1e-3

@@ -14,10 +14,10 @@ bearing_std = 1*np.pi/8192
 pixel_size_std = 3*(2*np.pi/8192)
 
 all_bearings, all_pixel_sizes, all_true_distance, all_us, all_mav_states, true_As_vels, own_vels = get_simulated_data(Ts, num_scenarios, num_frames, False)
-min_A = 2
-max_A = 10
+min_A = 3
+max_A = 40
 
-range_A = np.linspace(min_A, max_A, 3)
+range_A = np.linspace(min_A, max_A, 30)
 
 num_scenarios = len(all_bearings)  # Number of scenarios is the number of bearings minus one
 predicted_As = []
@@ -87,7 +87,7 @@ for i in tqdm(range(num_scenarios)):
         u = us[j+1]
         own_mav = mav_states[j+1]
         bearing_noise = bearing + np.random.normal(0, bearing_std)
-        pixel_size_noise = pixel_size + true_range**(1)*np.random.normal(0, pixel_size_std)
+        pixel_size_noise = pixel_size #+ true_range**(1)*np.random.normal(0, pixel_size_std)
         # bearing_noise, pixel_size_noise = add_simple_adaptive_noise(bearing, pixel_size, true_range, difficulty="easy", far_range=5000)
         # R_inverse_distance = get_adaptive_R(1/true_range, difficulty="easy", far_range=5000)
         measurement = np.array([bearing_noise, pixel_size_noise])
